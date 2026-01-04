@@ -6,15 +6,20 @@ A beautiful, modern web application for generating customizable chess/checker bo
 
 ### 🎨 Color & Gradient Customization
 - **Solid Colors**: Use the color picker for quick solid color selection
-- **Gradients**: Enable gradient mode to use CSS linear gradients for stunning effects
+- **Interactive Gradients**: Enable gradient mode with intuitive controls:
+  - Start and End color pickers
+  - Angle slider (0-360°) to control gradient direction
+  - Hardness slider to control gradient sharpness (0% = solid, 100% = sharp transition)
 - **Independent Control**: Light and dark squares can each be solid or gradient
-- **Flexible Input**: Supports hex colors (#fff), rgba colors, and linear-gradient() CSS strings
-- **Quick Presets**: 6 pre-made color schemes including gradient options (Classic, Green, Blue Gradient, Gray Gradient, Wood Gradient, Ocean Gradient)
+- **Board Gradient Overlay**: Apply a gradient across the entire board (e.g., darker bottom, lighter top)
+  - Perfect for adding depth and atmosphere
+  - Adjustable angle, opacity, and colors
+- **Quick Presets**: 6 pre-made color schemes (Classic, Green, Blue Gradient, Blue + Board, Wood, Ocean)
 
-### 🖼️ Real Texture Overlays
-- **Wood 1**: Authentic wood texture image
-- **Wood 2**: Alternative wood grain texture
-- **Grain**: Fine-grain texture for subtle variation
+### 🖼️ Texture Overlays
+- **Wood 1 & 2**: Authentic wood texture images
+- **Grain**: Photo-based grain texture
+- **Noise**: Improved procedural noise texture for subtle variation
 - **Adjustable Opacity**: Control texture visibility from 0% to 100%
 - **Per-Square Application**: Textures are overlaid on each square individually for optimal quality
 
@@ -73,25 +78,26 @@ npm run preview
 ## Usage
 
 ### Basic Usage
-1. **Select Colors**: Use the color pickers or type hex/rgba values to choose your light and dark square colors
-2. **Apply Gradients** (Optional):
-   - Check "Use Gradient" for either light or dark squares
-   - Enter a CSS gradient like: `linear-gradient(180deg, rgba(123, 133, 175, 1) 0%, rgba(62, 67, 88, 1) 100%)`
-3. **Apply Texture** (Optional): Select a texture type from the dropdown and adjust opacity
-4. **Choose Resolution**: Select your desired download resolution
-5. **Download**: Click the "Download Chessboard" button to save your custom board
+1. **Select Colors**:
+   - Solid color: Use the color picker
+   - Gradient: Check "Use Gradient" and select start/end colors
+2. **Adjust Gradient** (if enabled):
+   - **Angle**: Rotate the gradient direction (0-360°)
+   - **Hardness**: Control transition sharpness (0% = almost solid, 100% = very sharp)
+3. **Board Gradient Overlay** (Optional):
+   - Enable to apply gradient across entire board
+   - Great for creating depth (darker bottom, lighter top)
+   - Adjust angle and opacity to taste
+4. **Apply Texture** (Optional): Select a texture type and adjust opacity
+5. **Choose Resolution**: Select your desired download resolution
+6. **Download**: Click the "Download Chessboard" button to save your custom board
 
-### Gradient Examples
-```css
-/* Blue gradient - top to bottom */
-linear-gradient(180deg, rgba(123, 133, 175, 1) 0%, rgba(62, 67, 88, 1) 100%)
-
-/* Wood gradient - warm tones */
-linear-gradient(180deg, rgba(139, 69, 19, 1) 0%, rgba(205, 133, 63, 1) 100%)
-
-/* Ocean gradient - cool blues */
-linear-gradient(180deg, rgba(0, 151, 167, 1) 0%, rgba(0, 96, 100, 1) 100%)
-```
+### Tips
+- **Hardness at 0%**: Gradient appears almost like a solid color
+- **Hardness at 50%**: Smooth, natural gradient transition
+- **Hardness at 100%**: Sharp, dramatic color change
+- **Board Gradient at 180°**: Creates the classic darker-bottom, lighter-top effect
+- **Combine gradients**: Use both square gradients AND board gradient for stunning effects
 
 ## Technology Stack
 
@@ -116,19 +122,23 @@ ChessCheckerBoardGenerator/
 
 ## How It Works
 
-The application uses the HTML5 Canvas API to dynamically render an 8x8 checkerboard pattern. When you click download:
+The application uses the HTML5 Canvas API to dynamically render an 8x8 checkerboard pattern:
 
-1. A new canvas element is created at your selected resolution
-2. The 8x8 grid is drawn square by square with your chosen colors/gradients
-3. **Gradient Rendering**: CSS linear-gradient strings are parsed and converted to canvas gradients
-   - The angle is extracted and converted to canvas coordinates
-   - Color stops are parsed and applied to the gradient
-   - Each square gets its own gradient instance for proper rendering
-4. **Texture Application**: If a texture is selected, the image is overlaid on each square
-   - Real texture images (wood1.jpg, wood2.jpg, grain1.jpg) are loaded
-   - Textures are drawn with the specified opacity using multiply blend mode
-   - Per-square application ensures optimal quality at all resolutions
-5. The canvas is converted to a PNG blob and downloaded
+1. **Square Rendering**: Each square is drawn with either solid color or gradient
+   - Gradients are created using start/end colors, angle, and hardness parameters
+   - Hardness controls color stop distribution for sharp or smooth transitions
+   - Each square gets its own gradient instance for proper per-square rendering
+
+2. **Texture Application**: Textures are overlaid on each square individually
+   - Photo textures (wood1.jpg, wood2.jpg, grain1.jpg) are loaded as images
+   - Noise texture is procedurally generated for each square
+   - Applied with multiply blend mode at specified opacity
+
+3. **Board Gradient Overlay**: Optional gradient applied across entire board
+   - Creates atmospheric effects (darker bottom, lighter top)
+   - Independent angle and opacity control
+
+4. **Download**: Canvas is converted to PNG blob at selected resolution
 
 ## Browser Compatibility
 
