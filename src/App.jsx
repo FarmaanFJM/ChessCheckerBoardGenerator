@@ -291,7 +291,17 @@ function App() {
                   </div>
                 </div>
                 <label className="slider-label">
-                  <span>Angle: {lightGradientAngle}°</span>
+                  <div className="slider-header">
+                    <span>Angle</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="360"
+                      value={lightGradientAngle}
+                      onChange={(e) => setLightGradientAngle(Math.max(0, Math.min(360, parseInt(e.target.value) || 0)))}
+                      className="angle-text-input"
+                    />
+                  </div>
                   <input
                     type="range"
                     min="0"
@@ -369,7 +379,17 @@ function App() {
                   </div>
                 </div>
                 <label className="slider-label">
-                  <span>Angle: {darkGradientAngle}°</span>
+                  <div className="slider-header">
+                    <span>Angle</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="360"
+                      value={darkGradientAngle}
+                      onChange={(e) => setDarkGradientAngle(Math.max(0, Math.min(360, parseInt(e.target.value) || 0)))}
+                      className="angle-text-input"
+                    />
+                  </div>
                   <input
                     type="range"
                     min="0"
@@ -432,7 +452,17 @@ function App() {
                   </div>
                 </div>
                 <label className="slider-label">
-                  <span>Angle: {boardGradientAngle}°</span>
+                  <div className="slider-header">
+                    <span>Angle</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="360"
+                      value={boardGradientAngle}
+                      onChange={(e) => setBoardGradientAngle(Math.max(0, Math.min(360, parseInt(e.target.value) || 0)))}
+                      className="angle-text-input"
+                    />
+                  </div>
                   <input
                     type="range"
                     min="0"
