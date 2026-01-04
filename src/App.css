@@ -271,3 +271,69 @@ h1 {
 .preset-btn:active {
   transform: translateY(0);
 }
+
+/* Gradient Controls */
+.gradient-controls {
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.gradient-colors {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.gradient-color-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.small-label {
+  font-size: 0.85rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.color-input-small {
+  width: 100%;
+  height: 50px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.color-input-small:hover {
+  border-color: #667eea;
+  transform: scale(1.02);
+}
+
+.slider-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.slider-label:last-child {
+  margin-bottom: 0;
+}
+
+.slider-label span {
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.board-gradient-section {
+  background: #faf9ff;
+  padding: 1.25rem;
+  border-radius: 12px;
+  border: 2px solid #e8e6f5;
+  margin-top: 1.5rem;
+}
