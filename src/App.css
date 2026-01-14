@@ -36,16 +36,16 @@ h1 {
 }
 
 .tab-btn:hover {
-  border-color: #8b9aee;
+  border-color: #00a8cc;
   transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(139, 154, 238, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 168, 204, 0.3);
 }
 
 .tab-btn.active {
-  background: linear-gradient(135deg, #6b7ace, #8b9aee);
-  border-color: #8b9aee;
+  background: linear-gradient(135deg, #008ba8, #00a8cc);
+  border-color: #00a8cc;
   color: #fff;
-  box-shadow: 0 6px 24px rgba(139, 154, 238, 0.5);
+  box-shadow: 0 6px 24px rgba(0, 168, 204, 0.5);
   transform: translateY(-2px);
 }
 
@@ -137,7 +137,7 @@ h1 {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #8b9aee;
+  accent-color: #00a8cc;
 }
 
 .color-input-wrapper {
@@ -157,7 +157,7 @@ h1 {
 }
 
 .color-input:hover {
-  border-color: #8b9aee;
+  border-color: #00a8cc;
   transform: scale(1.05);
 }
 
@@ -175,8 +175,8 @@ h1 {
 
 .color-text-input:focus {
   outline: none;
-  border-color: #8b9aee;
-  box-shadow: 0 0 0 3px rgba(139, 154, 238, 0.2);
+  border-color: #00a8cc;
+  box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.2);
 }
 
 .select-input {
@@ -192,20 +192,20 @@ h1 {
 }
 
 .select-input:hover {
-  border-color: #8b9aee;
+  border-color: #00a8cc;
 }
 
 .select-input:focus {
   outline: none;
-  border-color: #8b9aee;
-  box-shadow: 0 0 0 3px rgba(139, 154, 238, 0.2);
+  border-color: #00a8cc;
+  box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.2);
 }
 
 .slider-input {
   width: 100%;
   height: 8px;
   border-radius: 4px;
-  background: linear-gradient(to right, #3a3a3a, #8b9aee);
+  background: linear-gradient(to right, #3a3a3a, #00a8cc);
   outline: none;
   -webkit-appearance: none;
   cursor: pointer;
@@ -217,14 +217,14 @@ h1 {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #8b9aee;
+  background: #00a8cc;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   transition: all 0.2s;
 }
 
 .slider-input::-webkit-slider-thumb:hover {
-  background: #a5b3f7;
+  background: #00c9e6;
   transform: scale(1.1);
 }
 
@@ -232,7 +232,7 @@ h1 {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #8b9aee;
+  background: #00a8cc;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   border: none;
@@ -240,7 +240,7 @@ h1 {
 }
 
 .slider-input::-moz-range-thumb:hover {
-  background: #a5b3f7;
+  background: #00c9e6;
   transform: scale(1.1);
 }
 
@@ -250,18 +250,18 @@ h1 {
   font-size: 1.1rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, #8b9aee 0%, #a5b3f7 100%);
+  background: linear-gradient(135deg, #00a8cc 0%, #00c9e6 100%);
   border: none;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 16px rgba(139, 154, 238, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 168, 204, 0.4);
   margin-top: 1rem;
 }
 
 .download-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(139, 154, 238, 0.6);
+  box-shadow: 0 6px 24px rgba(0, 168, 204, 0.6);
 }
 
 .download-button:active {
@@ -306,10 +306,10 @@ h1 {
 }
 
 .preset-btn:hover {
-  border-color: #8b9aee;
+  border-color: #00a8cc;
   background: #2a2a2a;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 154, 238, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 168, 204, 0.3);
 }
 
 .preset-btn:active {
@@ -354,7 +354,7 @@ h1 {
 }
 
 .color-input-small:hover {
-  border-color: #8b9aee;
+  border-color: #00a8cc;
   transform: scale(1.02);
 }
 
@@ -395,8 +395,8 @@ h1 {
 
 .angle-text-input:focus {
   outline: none;
-  border-color: #8b9aee;
-  box-shadow: 0 0 0 3px rgba(139, 154, 238, 0.2);
+  border-color: #00a8cc;
+  box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.2);
 }
 
 .angle-text-input::-webkit-inner-spin-button,

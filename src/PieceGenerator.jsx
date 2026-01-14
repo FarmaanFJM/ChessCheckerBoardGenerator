@@ -5,7 +5,16 @@ const PieceGenerator = () => {
   // Piece templates with customizable parameters
   const pieceTemplates = {
     king: (stroke, fill) => `
-      <path d="M50 15 L50 25 M45 20 L55 20 M50 25 L50 35 M40 35 L60 35 M45 35 L45 40 M55 35 L55 40 M40 40 L60 40 L55 70 L45 70 Z M30 70 L70 70 L75 80 L25 80 Z"
+      <!-- Cross on top -->
+      <path d="M50 12 L50 20 M46 16 L54 16"
+            stroke="${stroke}"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            fill="none"/>
+      <!-- Crown body -->
+      <path d="M38 32 L42 25 L46 32 L50 25 L54 32 L58 25 L62 32 L62 38 L38 38 Z
+               M40 38 L60 38 L58 68 L42 68 Z
+               M34 68 L66 68 L70 78 L30 78 Z"
             fill="${fill}"
             stroke="${stroke}"
             stroke-width="2.5"
@@ -13,15 +22,29 @@ const PieceGenerator = () => {
             stroke-linejoin="round"/>
     `,
     queen: (stroke, fill) => `
-      <path d="M30 25 L35 35 M50 15 L50 35 M70 25 L65 35 M35 35 L40 45 M65 35 L60 45 M40 45 L60 45 L55 70 L45 70 Z M30 70 L70 70 L75 80 L25 80 Z M30 25 Q30 20 35 20 Q35 25 40 25 M50 15 Q50 10 55 10 Q55 15 60 15 M70 25 Q70 20 65 20 Q65 25 60 25"
+      <!-- Crown with 5 ornaments -->
+      <path d="M28 32 L32 25 L36 32 L42 25 L48 32 L50 22 L52 32 L58 25 L64 32 L68 25 L72 32 L72 38 L28 38 Z
+               M30 38 L70 38 L67 68 L33 68 Z
+               M28 68 L72 68 L75 78 L25 78 Z"
             fill="${fill}"
             stroke="${stroke}"
             stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"/>
+      <!-- Ornament circles -->
+      <circle cx="32" cy="23" r="2.5" fill="${stroke}" stroke="none"/>
+      <circle cx="42" cy="23" r="2.5" fill="${stroke}" stroke="none"/>
+      <circle cx="50" cy="20" r="2.5" fill="${stroke}" stroke="none"/>
+      <circle cx="58" cy="23" r="2.5" fill="${stroke}" stroke="none"/>
+      <circle cx="68" cy="23" r="2.5" fill="${stroke}" stroke="none"/>
     `,
     bishop: (stroke, fill) => `
-      <path d="M50 15 Q48 18 50 22 Q52 18 50 15 M50 22 L50 35 M42 35 Q46 30 50 30 Q54 30 58 35 M42 35 L58 35 L56 70 L44 70 Z M32 70 L68 70 L72 80 L28 80 Z M47 45 L53 45 M47 55 L53 55"
+      <!-- Mitre hat with slit -->
+      <circle cx="50" cy="18" r="3" fill="${stroke}" stroke="none"/>
+      <path d="M50 21 L50 32 M42 32 Q46 26 50 26 Q54 26 58 32
+               M42 32 L58 32 L57 68 L43 68 Z
+               M35 68 L65 68 L68 78 L32 78 Z
+               M47 42 L53 42 M46 52 L54 52"
             fill="${fill}"
             stroke="${stroke}"
             stroke-width="2.5"
@@ -29,15 +52,27 @@ const PieceGenerator = () => {
             stroke-linejoin="round"/>
     `,
     knight: (stroke, fill) => `
-      <path d="M35 25 Q30 20 35 15 Q40 15 45 20 L50 28 Q52 32 50 38 L48 50 Q46 58 48 65 L48 70 M32 70 L68 70 L72 80 L28 80 Z M40 22 L42 18 M48 30 Q52 28 54 32"
+      <!-- Horse head profile -->
+      <path d="M35 68 L40 68 L40 55 Q40 45 42 40 Q44 35 46 32 L48 28 Q52 22 56 20 Q60 18 62 20 L64 24 Q64 28 62 30 L58 34 Q56 36 54 38 L52 42 Q50 46 50 52 L50 68 L68 68 L70 78 L30 78 Z
+               M56 26 L58 24 M60 22 Q62 20 64 22"
             fill="${fill}"
             stroke="${stroke}"
             stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"/>
+      <!-- Mane detail -->
+      <path d="M46 32 Q44 34 44 36"
+            stroke="${stroke}"
+            stroke-width="2"
+            fill="none"
+            stroke-linecap="round"/>
     `,
     rook: (stroke, fill) => `
-      <path d="M35 20 L35 35 M40 20 L40 28 M45 20 L45 35 M50 20 L50 28 M55 20 L55 35 M60 20 L60 28 M65 20 L65 35 M35 35 L65 35 L62 70 L38 70 Z M32 70 L68 70 L72 80 L28 80 Z M35 20 L65 20 M38 45 L62 45 M40 55 L60 55"
+      <!-- Castle with battlements -->
+      <path d="M32 22 L32 38 L68 38 L68 22 M36 22 L36 28 L40 28 L40 22 M44 22 L44 28 L48 28 L48 22 M52 22 L52 28 L56 28 L56 22 M60 22 L60 28 L64 28 L64 22
+               M34 38 L66 38 L64 68 L36 68 Z
+               M30 68 L70 68 L73 78 L27 78 Z
+               M38 48 L62 48 M40 58 L60 58"
             fill="${fill}"
             stroke="${stroke}"
             stroke-width="2.5"
@@ -45,7 +80,13 @@ const PieceGenerator = () => {
             stroke-linejoin="round"/>
     `,
     pawn: (stroke, fill) => `
-      <path d="M50 20 Q45 20 45 25 Q45 30 50 30 Q55 30 55 25 Q55 20 50 20 M50 30 L50 45 M45 45 L55 45 L54 65 L46 65 Z M35 65 L65 65 L68 75 L32 75 Z"
+      <!-- Simple pawn shape -->
+      <circle cx="50" cy="24" r="6"
+              fill="${fill}"
+              stroke="${stroke}"
+              stroke-width="2.5"/>
+      <path d="M50 30 L50 45 M44 45 L56 45 L55 65 L45 65 Z
+               M38 65 L62 65 L65 75 L35 75 Z"
             fill="${fill}"
             stroke="${stroke}"
             stroke-width="2.5"

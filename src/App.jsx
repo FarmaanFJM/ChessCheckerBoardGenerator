@@ -16,7 +16,7 @@ function App() {
   const [lightGradientHardness, setLightGradientHardness] = useState(0.5)
 
   // Dark square settings
-  const [darkUseGradient, setDarkUseGradient] = useState(true)
+  const [darkUseGradient, setDarkUseGradient] = useState(false)
   const [darkSolidColor, setDarkSolidColor] = useState('#b58863')
   const [darkGradientStart, setDarkGradientStart] = useState('#7b85af')
   const [darkGradientEnd, setDarkGradientEnd] = useState('#3e4358')
