@@ -3,10 +3,8 @@ import './App.css'
 import wood1 from '../assets/wood1.jpg'
 import wood2 from '../assets/wood2.jpg'
 import grain1 from '../assets/grain1.jpg'
-import PieceGenerator from './PieceGenerator'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('checkerboard')
   // Light square settings
   const [lightUseGradient, setLightUseGradient] = useState(false)
   const [lightSolidColor, setLightSolidColor] = useState('#e8dfd9')
@@ -16,7 +14,7 @@ function App() {
   const [lightGradientHardness, setLightGradientHardness] = useState(0.5)
 
   // Dark square settings
-  const [darkUseGradient, setDarkUseGradient] = useState(true)
+  const [darkUseGradient, setDarkUseGradient] = useState(false)
   const [darkSolidColor, setDarkSolidColor] = useState('#b58863')
   const [darkGradientStart, setDarkGradientStart] = useState('#7b85af')
   const [darkGradientEnd, setDarkGradientEnd] = useState('#3e4358')
@@ -230,22 +228,6 @@ function App() {
     <div className="app">
       <h1>♟ Chess/Checker Board Generator</h1>
 
-      <div className="tab-navigation">
-        <button
-          className={`tab-btn ${activeTab === 'checkerboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('checkerboard')}
-        >
-          ♔ Checkerboard Generator
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'piece' ? 'active' : ''}`}
-          onClick={() => setActiveTab('piece')}
-        >
-          ♟ Piece Generator
-        </button>
-      </div>
-
-      {activeTab === 'checkerboard' ? (
       <div className="container">
         <div className="preview-section">
           <h2>Preview</h2>
@@ -640,9 +622,6 @@ function App() {
           </div>
         </div>
       </div>
-      ) : (
-        <PieceGenerator />
-      )}
     </div>
   )
 }
