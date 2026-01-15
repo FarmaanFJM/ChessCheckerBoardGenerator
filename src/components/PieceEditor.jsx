@@ -110,6 +110,10 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
     if (pieceToEdit && pieceToEdit.layers && drawingEngine) {
       setCurrentPieceName(pieceToEdit.name);
       setCurrentPieceId(pieceToEdit.id);
+
+      // Clear existing layers before importing
+      layerManager.layers = [];
+
       layerManager.importData(pieceToEdit.layers, 256, 256).then(() => {
         renderCanvas();
         // Clear history and save loaded state
