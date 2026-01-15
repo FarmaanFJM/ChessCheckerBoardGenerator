@@ -3,6 +3,7 @@ import LayerPanel from './LayerPanel';
 import ToolPanel from './ToolPanel';
 import { LayerManager } from '../utils/layerManager';
 import { DrawingEngine } from '../utils/drawingEngine';
+import { HistoryManager } from '../utils/historyManager';
 import { savePiece, generatePieceId, downloadPiece, createThumbnail, loadImageFromFile } from '../utils/pieceStorage';
 import { getAvailableTemplates, loadTemplate } from '../utils/svgTemplates';
 import './PieceEditor.css';
@@ -16,7 +17,10 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
     lm.createLayer('Background', 256, 256);
     return lm;
   });
+  const [historyManager] = useState(() => new HistoryManager(50));
   const [drawingEngine, setDrawingEngine] = useState(null);
+  const [canUndo, setCanUndo] = useState(false);
+  const [canRedo, setCanRedo] = useState(false);
   const [currentPieceName, setCurrentPieceName] = useState('');
   const [currentPieceId, setCurrentPieceId] = useState(null);
   const [zoom, setZoom] = useState(1);
@@ -45,9 +49,30 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
       // Initial render
       renderCanvas(engine);
 
+      // Save initial state to history
+      setTimeout(() => {
+        const initialState = layerManager.exportData();
+        historyManager.saveState(initialState);
+        updateHistoryButtons();
+      }, 0);
+
       // Keyboard shortcuts
       const handleKeyDown = (e) => {
         if (e.target.tagName === 'INPUT') return;
+
+        // Undo/Redo shortcuts
+        if (e.ctrlKey || e.metaKey) {
+          if (e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            handleUndo();
+            return;
+          }
+          if (e.key === 'z' && e.shiftKey || e.key === 'y') {
+            e.preventDefault();
+            handleRedo();
+            return;
+          }
+        }
 
         switch (e.key.toLowerCase()) {
           case 'b': engine.setTool('brush'); break;
@@ -64,7 +89,19 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
       };
 
       window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
+
+      // Add native wheel event listener to prevent page scrolling
+      const canvas = canvasRef.current;
+      const handleWheelNative = (e) => {
+        e.preventDefault();
+        handleWheel(e);
+      };
+      canvas.addEventListener('wheel', handleWheelNative, { passive: false });
+
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        canvas.removeEventListener('wheel', handleWheelNative);
+      };
     }
   }, [canvasRef.current]);
 
@@ -73,16 +110,58 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
     if (pieceToEdit && pieceToEdit.layers && drawingEngine) {
       setCurrentPieceName(pieceToEdit.name);
       setCurrentPieceId(pieceToEdit.id);
+
+      // Clear existing layers before importing
+      layerManager.layers = [];
+
       layerManager.importData(pieceToEdit.layers, 256, 256).then(() => {
         renderCanvas();
+        // Clear history and save loaded state
+        historyManager.clear();
+        setTimeout(() => {
+          saveToHistory();
+        }, 0);
       });
     }
-  }, [pieceToEdit]);
+  }, [pieceToEdit, drawingEngine]);
 
   const renderCanvas = (engine = drawingEngine) => {
     if (!engine) return;
     engine.renderCanvas(referenceImage, referenceOpacity);
     forceUpdate({});
+  };
+
+  const saveToHistory = () => {
+    const state = layerManager.exportData();
+    historyManager.saveState(state);
+    updateHistoryButtons();
+  };
+
+  const updateHistoryButtons = () => {
+    setCanUndo(historyManager.canUndo());
+    setCanRedo(historyManager.canRedo());
+  };
+
+  const handleUndo = async () => {
+    const previousState = historyManager.undo();
+    if (previousState) {
+      historyManager.setRestoring(true);
+      await layerManager.importData(previousState, 256, 256);
+      historyManager.setRestoring(false);
+      renderCanvas();
+      updateHistoryButtons();
+    }
+  };
+
+  const handleRedo = async () => {
+    const nextState = historyManager.redo();
+    if (nextState) {
+      historyManager.setRestoring(true);
+      await layerManager.importData(nextState, 256, 256);
+      historyManager.setRestoring(false);
+      renderCanvas();
+      updateHistoryButtons();
+    }
   };
 
   const handleMouseDown = (e) => {
@@ -129,8 +208,14 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
     if (!drawingEngine) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const { x, y } = drawingEngine.getCanvasCoordinates(e, rect, 256, 256);
+    const wasDrawing = drawingEngine.isDrawing;
     drawingEngine.endDrawing(x, y);
     renderCanvas();
+
+    // Save to history after drawing operation completes
+    if (wasDrawing) {
+      saveToHistory();
+    }
   };
 
   const handleWheel = (e) => {
@@ -213,6 +298,12 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
       setReferenceImage(null);
       if (onClearEdit) onClearEdit();
       renderCanvas();
+
+      // Clear history and save new initial state
+      historyManager.clear();
+      setTimeout(() => {
+        saveToHistory();
+      }, 0);
     }
   };
 
@@ -236,6 +327,13 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
         if (onClearEdit) onClearEdit();
 
         renderCanvas();
+
+        // Clear history and save imported state
+        historyManager.clear();
+        setTimeout(() => {
+          saveToHistory();
+        }, 0);
+
         alert('Image imported successfully!');
       } catch (error) {
         alert('Failed to import image: ' + error.message);
@@ -267,6 +365,7 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
       await loadTemplate(templateId, layer.canvas, drawingEngine.color);
       renderCanvas();
       setShowTemplates(false);
+      saveToHistory();
     }
   };
 
@@ -308,6 +407,24 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
         <div className="editor-center">
           <div className="editor-toolbar">
             <div className="toolbar-group">
+              <button
+                onClick={handleUndo}
+                disabled={!canUndo}
+                title="Undo (Ctrl+Z)"
+                style={{ opacity: canUndo ? 1 : 0.5 }}
+              >
+                ↶
+              </button>
+              <button
+                onClick={handleRedo}
+                disabled={!canRedo}
+                title="Redo (Ctrl+Shift+Z)"
+                style={{ opacity: canRedo ? 1 : 0.5 }}
+              >
+                ↷
+              </button>
+            </div>
+            <div className="toolbar-group">
               <button onClick={handleZoomOut} title="Zoom Out (-)">🔍-</button>
               <span className="zoom-display">{Math.round(zoom * 100)}%</span>
               <button onClick={handleZoomIn} title="Zoom In (+)">🔍+</button>
@@ -343,7 +460,6 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
-              onWheel={handleWheel}
               className="editor-canvas"
             />
           </div>
@@ -377,7 +493,10 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
         <div className="editor-right">
           <LayerPanel
             layerManager={layerManager}
-            onLayersChange={renderCanvas}
+            onLayersChange={() => {
+              renderCanvas();
+              saveToHistory();
+            }}
           />
 
           <div className="reference-panel">
