@@ -75,7 +75,6 @@ function App() {
   // Generate SVG string for piece
   const generatePieceSVG = (type, color, size) => {
     const strokeColor = color
-    const strokeWidth = size / 200 // Scale stroke width based on size
 
     if (type === 'king') {
       return `
@@ -83,7 +82,7 @@ function App() {
           <path d="M50 15 L50 25 M45 20 L55 20 M50 25 L50 35 M40 35 L60 35 M45 35 L45 40 M55 35 L55 40 M40 40 L60 40 L55 70 L45 70 Z M30 70 L70 70 L75 80 L25 80 Z"
             fill="none"
             stroke="${strokeColor}"
-            stroke-width="${strokeWidth * 2.5}"
+            stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"/>
         </svg>
@@ -95,7 +94,7 @@ function App() {
           <path d="M30 70 L70 70 L75 80 L25 80 Z"
             fill="none"
             stroke="${strokeColor}"
-            stroke-width="${strokeWidth * 2.5}"
+            stroke-width="2.5"
             stroke-linecap="round"
             stroke-linejoin="round"/>
         </svg>
