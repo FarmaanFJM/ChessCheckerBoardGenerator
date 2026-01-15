@@ -5,6 +5,10 @@ import wood2 from '../assets/wood2.jpg'
 import grain1 from '../assets/grain1.jpg'
 
 function App() {
+  // Mode: 'checkerboard' or 'solid'
+  const [mode, setMode] = useState('checkerboard')
+  const [solidColor, setSolidColor] = useState('#e8dfd9')
+
   // Light square settings
   const [lightUseGradient, setLightUseGradient] = useState(false)
   const [lightSolidColor, setLightSolidColor] = useState('#e8dfd9')
@@ -64,6 +68,36 @@ function App() {
     })
   }, [])
 
+  // Color conversion utilities
+  const hexToRgb = (hex) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : null
+  }
+
+  const rgbToHex = (r, g, b) => {
+    return '#' + [r, g, b].map(x => {
+      const hex = Math.max(0, Math.min(255, Math.round(x))).toString(16)
+      return hex.length === 1 ? '0' + hex : hex
+    }).join('')
+  }
+
+  const parseColorInput = (input) => {
+    // Try to parse RGB format: rgb(r, g, b)
+    const rgbMatch = input.match(/rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/)
+    if (rgbMatch) {
+      const r = parseInt(rgbMatch[1])
+      const g = parseInt(rgbMatch[2])
+      const b = parseInt(rgbMatch[3])
+      return rgbToHex(r, g, b)
+    }
+    // Otherwise assume it's hex
+    return input
+  }
+
   // Generate procedural noise texture
   const generateNoiseTexture = (size) => {
     const canvas = document.createElement('canvas')
@@ -117,6 +151,12 @@ function App() {
     }
 
     return gradient
+  }
+
+  const drawSolidColor = (canvas, size) => {
+    const ctx = canvas.getContext('2d')
+    ctx.fillStyle = solidColor
+    ctx.fillRect(0, 0, size, size)
   }
 
   const drawChessboard = (canvas, size) => {
@@ -196,13 +236,18 @@ function App() {
     canvas.width = width
     canvas.height = height
 
-    drawChessboard(canvas, width)
+    if (mode === 'solid') {
+      drawSolidColor(canvas, width)
+    } else {
+      drawChessboard(canvas, width)
+    }
 
     canvas.toBlob((blob) => {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `chessboard-${resolution}.png`
+      const filename = mode === 'solid' ? `solid-color-${resolution}.png` : `chessboard-${resolution}.png`
+      link.download = filename
       link.click()
       URL.revokeObjectURL(url)
     })
@@ -215,9 +260,14 @@ function App() {
       const size = 600
       canvas.width = size
       canvas.height = size
-      drawChessboard(canvas, size)
+      if (mode === 'solid') {
+        drawSolidColor(canvas, size)
+      } else {
+        drawChessboard(canvas, size)
+      }
     }
   }, [
+    mode, solidColor,
     lightUseGradient, lightSolidColor, lightGradientStart, lightGradientEnd, lightGradientAngle, lightGradientHardness,
     darkUseGradient, darkSolidColor, darkGradientStart, darkGradientEnd, darkGradientAngle, darkGradientHardness,
     useBoardGradient, boardGradientStart, boardGradientEnd, boardGradientAngle, boardGradientOpacity,
@@ -239,8 +289,83 @@ function App() {
         <div className="controls-section">
           <h2>Customize</h2>
 
-          {/* Light Squares */}
+          {/* Mode Selector */}
           <div className="control-group">
+            <label>
+              <span className="label-text">Mode</span>
+              <select
+                value={mode}
+                onChange={(e) => setMode(e.target.value)}
+                className="select-input"
+              >
+                <option value="checkerboard">Checkerboard</option>
+                <option value="solid">Solid Color</option>
+              </select>
+            </label>
+          </div>
+
+          {/* Solid Color Controls */}
+          {mode === 'solid' && (
+            <div className="control-group">
+              <span className="label-text">Solid Color</span>
+              <div className="color-input-wrapper">
+                <input
+                  type="color"
+                  value={solidColor}
+                  onChange={(e) => setSolidColor(e.target.value)}
+                  className="color-input"
+                />
+                <input
+                  type="text"
+                  value={solidColor}
+                  onChange={(e) => setSolidColor(parseColorInput(e.target.value))}
+                  className="color-text-input"
+                  placeholder="#ffffff or rgb(255,255,255)"
+                />
+              </div>
+              <div className="rgb-input-group">
+                <input
+                  type="number"
+                  min="0"
+                  max="255"
+                  value={hexToRgb(solidColor)?.r || 0}
+                  onChange={(e) => {
+                    const rgb = hexToRgb(solidColor) || { r: 0, g: 0, b: 0 }
+                    setSolidColor(rgbToHex(parseInt(e.target.value) || 0, rgb.g, rgb.b))
+                  }}
+                  className="rgb-input"
+                  placeholder="R"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  max="255"
+                  value={hexToRgb(solidColor)?.g || 0}
+                  onChange={(e) => {
+                    const rgb = hexToRgb(solidColor) || { r: 0, g: 0, b: 0 }
+                    setSolidColor(rgbToHex(rgb.r, parseInt(e.target.value) || 0, rgb.b))
+                  }}
+                  className="rgb-input"
+                  placeholder="G"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  max="255"
+                  value={hexToRgb(solidColor)?.b || 0}
+                  onChange={(e) => {
+                    const rgb = hexToRgb(solidColor) || { r: 0, g: 0, b: 0 }
+                    setSolidColor(rgbToHex(rgb.r, rgb.g, parseInt(e.target.value) || 0))
+                  }}
+                  className="rgb-input"
+                  placeholder="B"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Light Squares */}
+          {mode === 'checkerboard' && <div className="control-group">
             <div className="label-with-toggle">
               <span className="label-text">Light Squares</span>
               <label className="checkbox-label">
@@ -254,20 +379,61 @@ function App() {
             </div>
 
             {!lightUseGradient ? (
-              <div className="color-input-wrapper">
-                <input
-                  type="color"
-                  value={lightSolidColor}
-                  onChange={(e) => setLightSolidColor(e.target.value)}
-                  className="color-input"
-                />
-                <input
-                  type="text"
-                  value={lightSolidColor}
-                  onChange={(e) => setLightSolidColor(e.target.value)}
-                  className="color-text-input"
-                />
-              </div>
+              <>
+                <div className="color-input-wrapper">
+                  <input
+                    type="color"
+                    value={lightSolidColor}
+                    onChange={(e) => setLightSolidColor(e.target.value)}
+                    className="color-input"
+                  />
+                  <input
+                    type="text"
+                    value={lightSolidColor}
+                    onChange={(e) => setLightSolidColor(parseColorInput(e.target.value))}
+                    className="color-text-input"
+                    placeholder="#ffffff or rgb(255,255,255)"
+                  />
+                </div>
+                <div className="rgb-input-group">
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={hexToRgb(lightSolidColor)?.r || 0}
+                    onChange={(e) => {
+                      const rgb = hexToRgb(lightSolidColor) || { r: 0, g: 0, b: 0 }
+                      setLightSolidColor(rgbToHex(parseInt(e.target.value) || 0, rgb.g, rgb.b))
+                    }}
+                    className="rgb-input"
+                    placeholder="R"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={hexToRgb(lightSolidColor)?.g || 0}
+                    onChange={(e) => {
+                      const rgb = hexToRgb(lightSolidColor) || { r: 0, g: 0, b: 0 }
+                      setLightSolidColor(rgbToHex(rgb.r, parseInt(e.target.value) || 0, rgb.b))
+                    }}
+                    className="rgb-input"
+                    placeholder="G"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={hexToRgb(lightSolidColor)?.b || 0}
+                    onChange={(e) => {
+                      const rgb = hexToRgb(lightSolidColor) || { r: 0, g: 0, b: 0 }
+                      setLightSolidColor(rgbToHex(rgb.r, rgb.g, parseInt(e.target.value) || 0))
+                    }}
+                    className="rgb-input"
+                    placeholder="B"
+                  />
+                </div>
+              </>
             ) : (
               <div className="gradient-controls">
                 <div className="gradient-colors">
@@ -325,10 +491,10 @@ function App() {
                 </label>
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Dark Squares */}
-          <div className="control-group">
+          {mode === 'checkerboard' && <div className="control-group">
             <div className="label-with-toggle">
               <span className="label-text">Dark Squares</span>
               <label className="checkbox-label">
@@ -342,20 +508,61 @@ function App() {
             </div>
 
             {!darkUseGradient ? (
-              <div className="color-input-wrapper">
-                <input
-                  type="color"
-                  value={darkSolidColor}
-                  onChange={(e) => setDarkSolidColor(e.target.value)}
-                  className="color-input"
-                />
-                <input
-                  type="text"
-                  value={darkSolidColor}
-                  onChange={(e) => setDarkSolidColor(e.target.value)}
-                  className="color-text-input"
-                />
-              </div>
+              <>
+                <div className="color-input-wrapper">
+                  <input
+                    type="color"
+                    value={darkSolidColor}
+                    onChange={(e) => setDarkSolidColor(e.target.value)}
+                    className="color-input"
+                  />
+                  <input
+                    type="text"
+                    value={darkSolidColor}
+                    onChange={(e) => setDarkSolidColor(parseColorInput(e.target.value))}
+                    className="color-text-input"
+                    placeholder="#ffffff or rgb(255,255,255)"
+                  />
+                </div>
+                <div className="rgb-input-group">
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={hexToRgb(darkSolidColor)?.r || 0}
+                    onChange={(e) => {
+                      const rgb = hexToRgb(darkSolidColor) || { r: 0, g: 0, b: 0 }
+                      setDarkSolidColor(rgbToHex(parseInt(e.target.value) || 0, rgb.g, rgb.b))
+                    }}
+                    className="rgb-input"
+                    placeholder="R"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={hexToRgb(darkSolidColor)?.g || 0}
+                    onChange={(e) => {
+                      const rgb = hexToRgb(darkSolidColor) || { r: 0, g: 0, b: 0 }
+                      setDarkSolidColor(rgbToHex(rgb.r, parseInt(e.target.value) || 0, rgb.b))
+                    }}
+                    className="rgb-input"
+                    placeholder="G"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={hexToRgb(darkSolidColor)?.b || 0}
+                    onChange={(e) => {
+                      const rgb = hexToRgb(darkSolidColor) || { r: 0, g: 0, b: 0 }
+                      setDarkSolidColor(rgbToHex(rgb.r, rgb.g, parseInt(e.target.value) || 0))
+                    }}
+                    className="rgb-input"
+                    placeholder="B"
+                  />
+                </div>
+              </>
             ) : (
               <div className="gradient-controls">
                 <div className="gradient-colors">
@@ -413,10 +620,10 @@ function App() {
                 </label>
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Board Gradient Overlay */}
-          <div className="control-group board-gradient-section">
+          {mode === 'checkerboard' && <div className="control-group board-gradient-section">
             <div className="label-with-toggle">
               <span className="label-text">Board Gradient Overlay</span>
               <label className="checkbox-label">
@@ -486,10 +693,10 @@ function App() {
                 </label>
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Texture */}
-          <div className="control-group">
+          {mode === 'checkerboard' && <div className="control-group">
             <label>
               <span className="label-text">Texture</span>
               <select
@@ -502,9 +709,9 @@ function App() {
                 ))}
               </select>
             </label>
-          </div>
+          </div>}
 
-          {texture !== 'none' && (
+          {mode === 'checkerboard' && texture !== 'none' && (
             <div className="control-group">
               <label>
                 <span className="label-text">Texture Opacity: {Math.round(textureOpacity * 100)}%</span>
@@ -538,11 +745,11 @@ function App() {
           </div>
 
           <button onClick={downloadBoard} className="download-button">
-            ⬇ Download Chessboard
+            ⬇ Download {mode === 'solid' ? 'Solid Color' : 'Chessboard'}
           </button>
 
           {/* Presets */}
-          <div className="presets">
+          {mode === 'checkerboard' && <div className="presets">
             <h3>Quick Presets</h3>
             <div className="preset-buttons">
               <button onClick={() => {
@@ -619,7 +826,7 @@ function App() {
                 Ocean
               </button>
             </div>
-          </div>
+          </div>}
         </div>
       </div>
     </div>
