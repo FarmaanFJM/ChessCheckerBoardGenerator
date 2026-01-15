@@ -7,9 +7,10 @@ import { savePiece, generatePieceId, downloadPiece, createThumbnail, loadImageFr
 import { getAvailableTemplates, loadTemplate } from '../utils/svgTemplates';
 import './PieceEditor.css';
 
-function PieceEditor({ savedPieces, onPiecesSave }) {
+function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
+  const importInputRef = useRef(null);
   const [layerManager] = useState(() => {
     const lm = new LayerManager();
     lm.createLayer('Background', 256, 256);
@@ -17,6 +18,7 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
   });
   const [drawingEngine, setDrawingEngine] = useState(null);
   const [currentPieceName, setCurrentPieceName] = useState('');
+  const [currentPieceId, setCurrentPieceId] = useState(null);
   const [zoom, setZoom] = useState(1);
   const [showGrid, setShowGrid] = useState(true);
   const [referenceImage, setReferenceImage] = useState(null);
@@ -65,6 +67,17 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
       return () => window.removeEventListener('keydown', handleKeyDown);
     }
   }, [canvasRef.current]);
+
+  // Load piece for editing
+  useEffect(() => {
+    if (pieceToEdit && pieceToEdit.layers && drawingEngine) {
+      setCurrentPieceName(pieceToEdit.name);
+      setCurrentPieceId(pieceToEdit.id);
+      layerManager.importData(pieceToEdit.layers, 256, 256).then(() => {
+        renderCanvas();
+      });
+    }
+  }, [pieceToEdit]);
 
   const renderCanvas = (engine = drawingEngine) => {
     if (!engine) return;
@@ -163,20 +176,20 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
     const thumbnail = createThumbnail(mergedCanvas);
 
     const piece = {
-      id: generatePieceId(),
+      id: currentPieceId || generatePieceId(),
       name,
       imageData: mergedCanvas.toDataURL('image/png'),
       thumbnail,
       layers: layerManager.exportData(),
-      createdAt: new Date().toISOString(),
+      createdAt: pieceToEdit?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
 
     await savePiece(piece);
     if (onPiecesSave) onPiecesSave();
 
-    alert(`Piece "${name}" saved successfully!`);
-    setCurrentPieceName('');
+    alert(`Piece "${name}" ${currentPieceId ? 'updated' : 'saved'} successfully!`);
+    handleNewPiece();
   };
 
   const handleDownloadPiece = async () => {
@@ -188,12 +201,45 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
   };
 
   const handleNewPiece = () => {
-    if (confirm('Create a new piece? This will clear the current work.')) {
+    const shouldClear = layerManager.getLayerCount() === 1 &&
+      !currentPieceName &&
+      !currentPieceId ? true : confirm('Create a new piece? This will clear the current work.');
+
+    if (shouldClear) {
       layerManager.layers = [];
       layerManager.createLayer('Background', 256, 256);
       setCurrentPieceName('');
+      setCurrentPieceId(null);
       setReferenceImage(null);
+      if (onClearEdit) onClearEdit();
       renderCanvas();
+    }
+  };
+
+  const handleImportPiece = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      try {
+        const img = await loadImageFromFile(file);
+
+        // Clear current work
+        layerManager.layers = [];
+        const layer = layerManager.createLayer('Imported Layer', 256, 256);
+
+        // Draw imported image to layer
+        layer.ctx.drawImage(img, 0, 0, 256, 256);
+
+        // Set name from filename
+        const name = file.name.replace(/\.[^/.]+$/, "");
+        setCurrentPieceName(name);
+        setCurrentPieceId(null);
+        if (onClearEdit) onClearEdit();
+
+        renderCanvas();
+        alert('Image imported successfully!');
+      } catch (error) {
+        alert('Failed to import image: ' + error.message);
+      }
     }
   };
 
@@ -236,6 +282,14 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
         />
         <div className="editor-actions">
           <button onClick={handleNewPiece} className="btn">New Piece</button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImportPiece}
+            style={{ display: 'none' }}
+          />
+          <button onClick={() => importInputRef.current.click()} className="btn">📁 Import</button>
           <button onClick={handleSavePiece} className="btn btn-primary">💾 Save Piece</button>
           <button onClick={handleDownloadPiece} className="btn">⬇️ Download</button>
         </div>
