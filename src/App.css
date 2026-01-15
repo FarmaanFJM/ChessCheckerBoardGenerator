@@ -1,6 +1,60 @@
 .app {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0f0f0f;
   color: #e0e0e0;
+}
+
+.app-header {
+  background: #1a1a1a;
+  border-bottom: 1px solid #2a2a2a;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.app-header h1 {
+  font-size: 24px;
+  margin: 0;
+  font-weight: 700;
+  color: #f0f0f0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.app-nav {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-btn {
+  background: #2a2a2a;
+  color: #d0d0d0;
+  border: 2px solid transparent;
+  padding: 10px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: #3a3a3a;
+  border-color: #4a9eff;
+}
+
+.nav-btn.active {
+  background: #4a9eff;
+  color: #fff;
+  border-color: #4a9eff;
+}
+
+.app-main {
+  flex: 1;
+  overflow: hidden;
 }
 
 h1 {

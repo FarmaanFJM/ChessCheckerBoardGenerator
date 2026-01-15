@@ -1,0 +1,46 @@
+.checkerboard-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.checkerboard-content {
+  display: flex;
+  flex: 1;
+  gap: 40px;
+  padding: 40px;
+  overflow: hidden;
+}
+
+/* Import existing styles from App.css */
+.checkerboard-container .preview-section,
+.checkerboard-container .controls-section,
+.checkerboard-container .canvas-wrapper,
+.checkerboard-container .preview-canvas,
+.checkerboard-container .control-group,
+.checkerboard-container .label-text,
+.checkerboard-container .select-input,
+.checkerboard-container .color-input-wrapper,
+.checkerboard-container .color-input,
+.checkerboard-container .color-text-input,
+.checkerboard-container .rgb-input-group,
+.checkerboard-container .rgb-input,
+.checkerboard-container .label-with-toggle,
+.checkerboard-container .checkbox-label,
+.checkerboard-container .gradient-controls,
+.checkerboard-container .gradient-colors,
+.checkerboard-container .gradient-color-item,
+.checkerboard-container .small-label,
+.checkerboard-container .color-input-small,
+.checkerboard-container .slider-label,
+.checkerboard-container .slider-header,
+.checkerboard-container .angle-text-input,
+.checkerboard-container .slider-input,
+.checkerboard-container .download-button,
+.checkerboard-container .presets,
+.checkerboard-container .preset-buttons,
+.checkerboard-container .preset-btn {
+  /* Styles inherited from App.css */
+}

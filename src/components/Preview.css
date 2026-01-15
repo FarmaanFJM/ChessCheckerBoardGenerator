@@ -1,0 +1,283 @@
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: #222;
+  border-bottom: 1px solid #333;
+}
+
+.preview-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.preview-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 16px;
+  padding: 24px;
+}
+
+.preview-board {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-canvas {
+  display: block;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  max-width: 100%;
+  height: auto;
+}
+
+.board-hint {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #aaa;
+  text-align: center;
+}
+
+.preview-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.pieces-panel {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.pieces-panel h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.no-pieces {
+  text-align: center;
+  padding: 40px 20px;
+  color: #aaa;
+}
+
+.no-pieces p {
+  margin: 8px 0;
+}
+
+.no-pieces .hint {
+  font-size: 13px;
+  color: #666;
+}
+
+.pieces-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.piece-item {
+  background: #333;
+  border: 2px solid #444;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  text-align: center;
+}
+
+.piece-item:hover {
+  border-color: #555;
+  background: #3a3a3a;
+}
+
+.piece-item.selected {
+  border-color: #4a9eff;
+  background: #3a4a5a;
+}
+
+.piece-thumbnail {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-conic-gradient(#444 0% 25%, #555 0% 50%) 50% / 10px 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.piece-thumbnail img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.piece-name {
+  font-size: 13px;
+  font-weight: 500;
+  word-break: break-word;
+  margin-bottom: 8px;
+}
+
+.piece-actions {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: none;
+  gap: 4px;
+  align-items: center;
+}
+
+.piece-item:hover .piece-actions {
+  display: flex;
+}
+
+.edit-piece-btn,
+.delete-piece-btn {
+  background: rgba(74, 158, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  color: white;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.edit-piece-btn:hover {
+  background: rgba(74, 158, 255, 1);
+  transform: scale(1.1);
+}
+
+.delete-piece-btn {
+  background: rgba(255, 107, 107, 0.9);
+  font-size: 18px;
+}
+
+.delete-piece-btn:hover {
+  background: rgba(255, 107, 107, 1);
+  transform: scale(1.1);
+}
+
+.board-colors-panel {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.board-colors-panel h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.color-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.color-input-group label {
+  display: block;
+  font-size: 13px;
+  color: #aaa;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.color-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.color-input-wrapper input[type="color"] {
+  width: 48px;
+  height: 48px;
+  border: 2px solid #555;
+  border-radius: 6px;
+  cursor: pointer;
+  background: none;
+}
+
+.color-input-wrapper input[type="text"] {
+  flex: 1;
+  background: #333;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: #fff;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+}
+
+.color-input-wrapper input[type="text"]:focus {
+  outline: none;
+  border-color: #4a9eff;
+}
+
+.stats-panel {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.stats-panel h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.stat-label {
+  color: #aaa;
+}
+
+.stat-value {
+  font-weight: 600;
+  font-size: 16px;
+  color: #4a9eff;
+}
