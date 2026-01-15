@@ -89,7 +89,19 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
       };
 
       window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
+
+      // Add native wheel event listener to prevent page scrolling
+      const canvas = canvasRef.current;
+      const handleWheelNative = (e) => {
+        e.preventDefault();
+        handleWheel(e);
+      };
+      canvas.addEventListener('wheel', handleWheelNative, { passive: false });
+
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        canvas.removeEventListener('wheel', handleWheelNative);
+      };
     }
   }, [canvasRef.current]);
 
@@ -107,7 +119,7 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
         }, 0);
       });
     }
-  }, [pieceToEdit]);
+  }, [pieceToEdit, drawingEngine]);
 
   const renderCanvas = (engine = drawingEngine) => {
     if (!engine) return;
@@ -444,7 +456,6 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
-              onWheel={handleWheel}
               className="editor-canvas"
             />
           </div>
