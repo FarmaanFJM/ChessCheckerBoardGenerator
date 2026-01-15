@@ -241,13 +241,31 @@ export class LayerManager {
    * Import layers data (for loading)
    */
   async importData(data, width, height) {
+    const layersData = Array.isArray(data?.layers)
+      ? data.layers
+      : Array.isArray(data)
+        ? data
+        : [];
     this.layers = [];
-    this.nextId = data.nextId || 1;
-    this.activeLayerId = data.activeLayerId;
+    this.nextId = data?.nextId || 1;
+    this.activeLayerId = data?.activeLayerId;
     const usedIds = new Set();
     const idMap = new Map();
+    const seenSignatures = new Set();
 
-    for (const layerData of data.layers) {
+    for (const layerData of layersData) {
+      const signature = [
+        layerData.name,
+        layerData.visible,
+        layerData.opacity,
+        layerData.locked,
+        layerData.imageData
+      ].join('|');
+      if (seenSignatures.has(signature)) {
+        continue;
+      }
+      seenSignatures.add(signature);
+
       let layerId = layerData.id;
       const isValidId = Number.isInteger(layerId);
       if (!isValidId || usedIds.has(layerId)) {
