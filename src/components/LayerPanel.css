@@ -175,7 +175,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-.layer-menu:hover .layer-dropdown {
+.layer-menu.open .layer-dropdown {
   display: block;
 }
 

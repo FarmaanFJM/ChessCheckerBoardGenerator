@@ -1,15 +1,26 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './LayerPanel.css';
 
 function LayerPanel({ layerManager, onLayersChange }) {
-  const [layers, setLayers] = useState(layerManager.getAllLayers());
-  const [activeLayerId, setActiveLayerId] = useState(layerManager.activeLayerId);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const layers = layerManager.getAllLayers();
+  const activeLayerId = layerManager.activeLayerId;
 
   const refreshLayers = () => {
-    setLayers([...layerManager.getAllLayers()]);
-    setActiveLayerId(layerManager.activeLayerId);
     if (onLayersChange) onLayersChange();
+    setOpenMenuId(null);
   };
+
+  useEffect(() => {
+    const handleDocumentClick = () => {
+      setOpenMenuId(null);
+    };
+
+    document.addEventListener('click', handleDocumentClick);
+    return () => {
+      document.removeEventListener('click', handleDocumentClick);
+    };
+  }, []);
 
   const handleAddLayer = () => {
     const width = layers[0]?.canvas.width || 256;
@@ -37,6 +48,11 @@ function LayerPanel({ layerManager, onLayersChange }) {
   const handleSelectLayer = (id) => {
     layerManager.setActiveLayer(id);
     refreshLayers();
+  };
+
+  const handleToggleMenu = (e, id) => {
+    e.stopPropagation();
+    setOpenMenuId((prevId) => (prevId === id ? null : id));
   };
 
   const handleToggleVisibility = (id) => {
@@ -154,8 +170,17 @@ function LayerPanel({ layerManager, onLayersChange }) {
                   {layer.locked ? '🔒' : '🔓'}
                 </button>
 
-                <div className="layer-menu">
-                  <button className="icon-btn" title="More options">⋮</button>
+                <div
+                  className={`layer-menu ${openMenuId === layer.id ? 'open' : ''}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    className="icon-btn"
+                    title="More options"
+                    onClick={(e) => handleToggleMenu(e, layer.id)}
+                  >
+                    ⋮
+                  </button>
                   <div className="layer-dropdown">
                     <button onClick={(e) => { e.stopPropagation(); handleDuplicateLayer(layer.id); }}>
                       Duplicate

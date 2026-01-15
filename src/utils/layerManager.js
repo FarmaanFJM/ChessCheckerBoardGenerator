@@ -273,5 +273,15 @@ export class LayerManager {
 
       this.layers.push(layer);
     }
+
+    const hasActiveLayer = this.layers.some((layer) => layer.id === this.activeLayerId);
+    if (!hasActiveLayer) {
+      this.activeLayerId = this.layers[0]?.id || null;
+    }
+
+    const maxId = this.layers.reduce((max, layer) => Math.max(max, layer.id), 0);
+    if (this.nextId <= maxId) {
+      this.nextId = maxId + 1;
+    }
   }
 }
