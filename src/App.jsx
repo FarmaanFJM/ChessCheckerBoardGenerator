@@ -5,9 +5,14 @@ import wood2 from '../assets/wood2.jpg'
 import grain1 from '../assets/grain1.jpg'
 
 function App() {
-  // Mode: 'checkerboard' or 'solid'
+  // Mode: 'checkerboard', 'solid', or 'piece'
   const [mode, setMode] = useState('checkerboard')
   const [solidColor, setSolidColor] = useState('#e8dfd9')
+
+  // Piece template settings
+  const [pieceType, setPieceType] = useState('king')
+  const [pieceResolution, setPieceResolution] = useState('512x512')
+  const [pieceColor, setPieceColor] = useState('#007a8c')
 
   // Light square settings
   const [lightUseGradient, setLightUseGradient] = useState(false)
@@ -54,6 +59,49 @@ function App() {
     { label: 'Grain', value: 'grain1', src: grain1 },
     { label: 'Noise', value: 'noise', procedural: true }
   ]
+
+  const pieceResolutions = [
+    { label: '256x256', value: '256x256' },
+    { label: '512x512', value: '512x512' },
+    { label: '1024x1024', value: '1024x1024' },
+    { label: '2048x2048', value: '2048x2048' }
+  ]
+
+  const pieceTypes = [
+    { label: 'Full King', value: 'king' },
+    { label: 'Base Only', value: 'base' }
+  ]
+
+  // Generate SVG string for piece
+  const generatePieceSVG = (type, color, size) => {
+    const strokeColor = color
+    const strokeWidth = size / 200 // Scale stroke width based on size
+
+    if (type === 'king') {
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${size}" height="${size}">
+          <path d="M50 15 L50 25 M45 20 L55 20 M50 25 L50 35 M40 35 L60 35 M45 35 L45 40 M55 35 L55 40 M40 40 L60 40 L55 70 L45 70 Z M30 70 L70 70 L75 80 L25 80 Z"
+            fill="none"
+            stroke="${strokeColor}"
+            stroke-width="${strokeWidth * 2.5}"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+        </svg>
+      `
+    } else {
+      // Base only
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="${size}" height="${size}">
+          <path d="M30 70 L70 70 L75 80 L25 80 Z"
+            fill="none"
+            stroke="${strokeColor}"
+            stroke-width="${strokeWidth * 2.5}"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+        </svg>
+      `
+    }
+  }
 
   // Load texture images
   useEffect(() => {
@@ -331,6 +379,50 @@ function App() {
     })
   }
 
+  const downloadPiece = () => {
+    const [width, height] = pieceResolution.split('x').map(Number)
+    const svgString = generatePieceSVG(pieceType, pieceColor, width)
+
+    // Create an image from the SVG
+    const img = new Image()
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+    const url = URL.createObjectURL(svgBlob)
+
+    img.onload = () => {
+      // Create canvas and draw the image
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+
+      // Clear canvas with transparency
+      ctx.clearRect(0, 0, width, height)
+
+      // Draw the image
+      ctx.drawImage(img, 0, 0, width, height)
+
+      // Convert to PNG and download
+      canvas.toBlob((blob) => {
+        const downloadUrl = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = downloadUrl
+
+        // Generate filename
+        const code = generateCode()
+        const colorName = getColorName(pieceColor)
+        const typeName = pieceType === 'king' ? 'king' : 'base'
+        const filename = `chess-piece-${typeName}-${colorName}-${code}.png`
+
+        link.download = filename
+        link.click()
+        URL.revokeObjectURL(downloadUrl)
+        URL.revokeObjectURL(url)
+      })
+    }
+
+    img.src = url
+  }
+
   // Preview canvas effect
   useEffect(() => {
     if (canvasRef.current) {
@@ -338,14 +430,31 @@ function App() {
       const size = 600
       canvas.width = size
       canvas.height = size
+
       if (mode === 'solid') {
         drawSolidColor(canvas, size)
+      } else if (mode === 'piece') {
+        // Draw piece preview
+        const ctx = canvas.getContext('2d')
+        ctx.clearRect(0, 0, size, size)
+
+        const svgString = generatePieceSVG(pieceType, pieceColor, size)
+        const img = new Image()
+        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+        const url = URL.createObjectURL(svgBlob)
+
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, size, size)
+          URL.revokeObjectURL(url)
+        }
+
+        img.src = url
       } else {
         drawChessboard(canvas, size)
       }
     }
   }, [
-    mode, solidColor,
+    mode, solidColor, pieceType, pieceColor,
     lightUseGradient, lightSolidColor, lightGradientStart, lightGradientEnd, lightGradientAngle, lightGradientHardness,
     darkUseGradient, darkSolidColor, darkGradientStart, darkGradientEnd, darkGradientAngle, darkGradientHardness,
     useBoardGradient, boardGradientStart, boardGradientEnd, boardGradientAngle, boardGradientOpacity,
@@ -378,6 +487,7 @@ function App() {
               >
                 <option value="checkerboard">Checkerboard</option>
                 <option value="solid">Solid Color</option>
+                <option value="piece">Piece Template</option>
               </select>
             </label>
           </div>
@@ -440,6 +550,98 @@ function App() {
                 />
               </div>
             </div>
+          )}
+
+          {/* Piece Template Controls */}
+          {mode === 'piece' && (
+            <>
+              <div className="control-group">
+                <label>
+                  <span className="label-text">Piece Type</span>
+                  <select
+                    value={pieceType}
+                    onChange={(e) => setPieceType(e.target.value)}
+                    className="select-input"
+                  >
+                    {pieceTypes.map(t => (
+                      <option key={t.value} value={t.value}>{t.label}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <div className="control-group">
+                <span className="label-text">Piece Color</span>
+                <div className="color-input-wrapper">
+                  <input
+                    type="color"
+                    value={pieceColor}
+                    onChange={(e) => setPieceColor(e.target.value)}
+                    className="color-input"
+                  />
+                  <input
+                    type="text"
+                    value={pieceColor}
+                    onChange={(e) => setPieceColor(parseColorInput(e.target.value))}
+                    className="color-text-input"
+                    placeholder="#ffffff or rgb(255,255,255)"
+                  />
+                </div>
+                <div className="rgb-input-group">
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={hexToRgb(pieceColor)?.r || 0}
+                    onChange={(e) => {
+                      const rgb = hexToRgb(pieceColor) || { r: 0, g: 0, b: 0 }
+                      setPieceColor(rgbToHex(parseInt(e.target.value) || 0, rgb.g, rgb.b))
+                    }}
+                    className="rgb-input"
+                    placeholder="R"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={hexToRgb(pieceColor)?.g || 0}
+                    onChange={(e) => {
+                      const rgb = hexToRgb(pieceColor) || { r: 0, g: 0, b: 0 }
+                      setPieceColor(rgbToHex(rgb.r, parseInt(e.target.value) || 0, rgb.b))
+                    }}
+                    className="rgb-input"
+                    placeholder="G"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="255"
+                    value={hexToRgb(pieceColor)?.b || 0}
+                    onChange={(e) => {
+                      const rgb = hexToRgb(pieceColor) || { r: 0, g: 0, b: 0 }
+                      setPieceColor(rgbToHex(rgb.r, rgb.g, parseInt(e.target.value) || 0))
+                    }}
+                    className="rgb-input"
+                    placeholder="B"
+                  />
+                </div>
+              </div>
+
+              <div className="control-group">
+                <label>
+                  <span className="label-text">Download Resolution</span>
+                  <select
+                    value={pieceResolution}
+                    onChange={(e) => setPieceResolution(e.target.value)}
+                    className="select-input"
+                  >
+                    {pieceResolutions.map(r => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </>
           )}
 
           {/* Light Squares */}
@@ -822,8 +1024,8 @@ function App() {
             </label>
           </div>
 
-          <button onClick={downloadBoard} className="download-button">
-            ⬇ Download {mode === 'solid' ? 'Solid Color' : 'Chessboard'}
+          <button onClick={mode === 'piece' ? downloadPiece : downloadBoard} className="download-button">
+            ⬇ Download {mode === 'solid' ? 'Solid Color' : mode === 'piece' ? 'Piece' : 'Chessboard'}
           </button>
 
           {/* Presets */}
