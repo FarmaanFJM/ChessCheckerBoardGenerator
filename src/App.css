@@ -411,3 +411,33 @@ h1 {
   border: 2px solid #3a3a4a;
   margin-top: 1.5rem;
 }
+
+.rgb-input-group {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.rgb-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid #4a4a4a;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: monospace;
+  transition: all 0.2s;
+  background: #1a1a1a;
+  color: #e0e0e0;
+  text-align: center;
+}
+
+.rgb-input:focus {
+  outline: none;
+  border-color: #00a8cc;
+  box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.2);
+}
+
+.rgb-input::-webkit-inner-spin-button,
+.rgb-input::-webkit-outer-spin-button {
+  opacity: 1;
+}
