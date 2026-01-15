@@ -54,9 +54,19 @@ export class DrawingEngine {
   /**
    * Get canvas coordinates from mouse event
    */
-  getCanvasCoordinates(e, canvasRect) {
-    const x = Math.floor((e.clientX - canvasRect.left - this.panX) / this.zoom);
-    const y = Math.floor((e.clientY - canvasRect.top - this.panY) / this.zoom);
+  getCanvasCoordinates(e, canvasRect, layerWidth, layerHeight) {
+    // Calculate the scale between display canvas and layer canvas
+    const scaleX = layerWidth / this.canvas.width;
+    const scaleY = layerHeight / this.canvas.height;
+
+    // Get mouse position relative to canvas
+    const mouseX = e.clientX - canvasRect.left;
+    const mouseY = e.clientY - canvasRect.top;
+
+    // Apply inverse transform (zoom and pan)
+    const x = Math.floor((mouseX - this.panX) / this.zoom * scaleX);
+    const y = Math.floor((mouseY - this.panY) / this.zoom * scaleY);
+
     return { x, y };
   }
 
@@ -393,25 +403,46 @@ export class DrawingEngine {
    * Render all layers to display canvas
    */
   renderCanvas(referenceImage = null, referenceOpacity = 0.5) {
+    const layers = this.layerManager.getAllLayers();
+    if (layers.length === 0) return;
+
+    const layerWidth = layers[0].canvas.width;
+    const layerHeight = layers[0].canvas.height;
+
+    // Clear canvas
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Calculate scale to fit layer in display canvas
+    const scale = Math.min(
+      this.canvas.width / layerWidth,
+      this.canvas.height / layerHeight
+    );
 
     this.ctx.save();
     this.ctx.translate(this.panX, this.panY);
-    this.ctx.scale(this.zoom, this.zoom);
+    this.ctx.scale(this.zoom * scale, this.zoom * scale);
 
     // Draw reference image if provided
     if (referenceImage) {
       this.ctx.globalAlpha = referenceOpacity;
-      this.ctx.drawImage(referenceImage, 0, 0);
+      // Center reference image
+      const refScale = Math.min(
+        layerWidth / referenceImage.width,
+        layerHeight / referenceImage.height
+      );
+      const refWidth = referenceImage.width * refScale;
+      const refHeight = referenceImage.height * refScale;
+      const refX = (layerWidth - refWidth) / 2;
+      const refY = (layerHeight - refHeight) / 2;
+      this.ctx.drawImage(referenceImage, refX, refY, refWidth, refHeight);
       this.ctx.globalAlpha = 1;
     }
 
     // Draw all visible layers
-    const layers = this.layerManager.getAllLayers();
     for (const layer of layers) {
       if (layer.visible) {
         this.ctx.globalAlpha = layer.opacity;
-        this.ctx.drawImage(layer.canvas, 0, 0);
+        this.ctx.drawImage(layer.canvas, 0, 0, layerWidth, layerHeight);
       }
     }
 

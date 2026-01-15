@@ -64,7 +64,7 @@ function ToolPanel({ drawingEngine, onToolChange, onColorChange, onBrushSizeChan
     <div className="tool-panel">
       <div className="tool-section">
         <h4>Tool</h4>
-        <div className="tool-grid">
+        <div className="tool-list">
           {tools.map((tool) => (
             <button
               key={tool.id}
@@ -73,6 +73,8 @@ function ToolPanel({ drawingEngine, onToolChange, onColorChange, onBrushSizeChan
               title={`${tool.name} (${tool.shortcut})`}
             >
               <span className="tool-icon">{tool.icon}</span>
+              <span className="tool-name">{tool.name}</span>
+              <span className="tool-shortcut">{tool.shortcut}</span>
             </button>
           ))}
         </div>

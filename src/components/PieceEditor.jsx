@@ -27,6 +27,17 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
   useEffect(() => {
     if (canvasRef.current) {
       const engine = new DrawingEngine(canvasRef.current, layerManager);
+
+      // Initialize view to center the canvas
+      const layerWidth = 256;
+      const layerHeight = 256;
+      const scale = Math.min(
+        canvasRef.current.width / layerWidth,
+        canvasRef.current.height / layerHeight
+      );
+      engine.panX = (canvasRef.current.width - layerWidth * scale) / 2;
+      engine.panY = (canvasRef.current.height - layerHeight * scale) / 2;
+
       setDrawingEngine(engine);
 
       // Initial render
@@ -64,7 +75,7 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
   const handleMouseDown = (e) => {
     if (!drawingEngine) return;
     const rect = canvasRef.current.getBoundingClientRect();
-    const { x, y } = drawingEngine.getCanvasCoordinates(e, rect);
+    const { x, y } = drawingEngine.getCanvasCoordinates(e, rect, 256, 256);
     drawingEngine.startDrawing(x, y);
     renderCanvas();
   };
@@ -72,7 +83,7 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
   const handleMouseMove = (e) => {
     if (!drawingEngine) return;
     const rect = canvasRef.current.getBoundingClientRect();
-    const { x, y } = drawingEngine.getCanvasCoordinates(e, rect);
+    const { x, y } = drawingEngine.getCanvasCoordinates(e, rect, 256, 256);
     drawingEngine.continueDrawing(x, y);
 
     // Show shape preview for shape tools
@@ -81,11 +92,20 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
       const preview = drawingEngine.getShapePreview(x, y);
       if (preview) {
         const ctx = canvasRef.current.getContext('2d');
-        ctx.save();
-        ctx.translate(drawingEngine.panX, drawingEngine.panY);
-        ctx.scale(drawingEngine.zoom, drawingEngine.zoom);
-        ctx.drawImage(preview, 0, 0);
-        ctx.restore();
+        const layers = layerManager.getAllLayers();
+        if (layers.length > 0) {
+          const layerWidth = layers[0].canvas.width;
+          const layerHeight = layers[0].canvas.height;
+          const scale = Math.min(
+            canvasRef.current.width / layerWidth,
+            canvasRef.current.height / layerHeight
+          );
+          ctx.save();
+          ctx.translate(drawingEngine.panX, drawingEngine.panY);
+          ctx.scale(drawingEngine.zoom * scale, drawingEngine.zoom * scale);
+          ctx.drawImage(preview, 0, 0);
+          ctx.restore();
+        }
       }
     } else {
       renderCanvas();
@@ -95,7 +115,7 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
   const handleMouseUp = (e) => {
     if (!drawingEngine) return;
     const rect = canvasRef.current.getBoundingClientRect();
-    const { x, y } = drawingEngine.getCanvasCoordinates(e, rect);
+    const { x, y } = drawingEngine.getCanvasCoordinates(e, rect, 256, 256);
     drawingEngine.endDrawing(x, y);
     renderCanvas();
   };
@@ -253,9 +273,14 @@ function PieceEditor({ savedPieces, onPiecesSave }) {
             </div>
           </div>
 
-          <div className="canvas-container" style={{
-            backgroundImage: showGrid ? 'repeating-linear-gradient(0deg, #ddd 0px, #ddd 1px, transparent 1px, transparent 20px), repeating-linear-gradient(90deg, #ddd 0px, #ddd 1px, transparent 1px, transparent 20px)' : 'none'
-          }}>
+          <div
+            className="canvas-container"
+            onWheel={(e) => e.preventDefault()}
+            style={{
+              backgroundImage: showGrid ? 'repeating-linear-gradient(0deg, #555 0px, #555 1px, transparent 1px, transparent 20px), repeating-linear-gradient(90deg, #555 0px, #555 1px, transparent 1px, transparent 20px)' : 'none',
+              backgroundColor: '#3a3a3a'
+            }}
+          >
             <canvas
               ref={canvasRef}
               width={512}

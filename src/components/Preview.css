@@ -142,29 +142,47 @@
   font-size: 13px;
   font-weight: 500;
   word-break: break-word;
+  margin-bottom: 8px;
 }
 
-.delete-piece-btn {
+.piece-actions {
   position: absolute;
   top: 4px;
   right: 4px;
-  background: rgba(255, 107, 107, 0.9);
+  display: none;
+  gap: 4px;
+  align-items: center;
+}
+
+.piece-item:hover .piece-actions {
+  display: flex;
+}
+
+.edit-piece-btn,
+.delete-piece-btn {
+  background: rgba(74, 158, 255, 0.9);
   border: none;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   color: white;
-  font-size: 18px;
+  font-size: 14px;
   line-height: 1;
   cursor: pointer;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
 }
 
-.piece-item:hover .delete-piece-btn {
-  display: flex;
+.edit-piece-btn:hover {
+  background: rgba(74, 158, 255, 1);
+  transform: scale(1.1);
+}
+
+.delete-piece-btn {
+  background: rgba(255, 107, 107, 0.9);
+  font-size: 18px;
 }
 
 .delete-piece-btn:hover {

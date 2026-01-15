@@ -26,22 +26,26 @@
   letter-spacing: 0.5px;
 }
 
-.tool-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+.tool-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .tool-btn {
   background: #333;
   border: 2px solid transparent;
   border-radius: 6px;
-  padding: 12px;
+  padding: 8px 12px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: #d0d0d0;
+  text-align: left;
 }
 
 .tool-btn:hover {
@@ -52,10 +56,26 @@
 .tool-btn.active {
   background: #4a9eff;
   border-color: #4a9eff;
+  color: #fff;
 }
 
 .tool-icon {
-  font-size: 20px;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.tool-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.tool-shortcut {
+  font-size: 11px;
+  opacity: 0.6;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
 }
 
 .color-section {

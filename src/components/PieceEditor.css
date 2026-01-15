@@ -149,8 +149,9 @@
   display: block;
   cursor: crosshair;
   image-rendering: pixelated;
-  background: repeating-conic-gradient(#fff 0% 25%, #e0e0e0 0% 50%) 50% / 20px 20px;
+  background: repeating-conic-gradient(#2a2a2a 0% 25%, #333 0% 50%) 50% / 10px 10px;
   border-radius: 4px;
+  box-shadow: 0 0 0 1px #555;
 }
 
 .reference-panel {

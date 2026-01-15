@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { loadAllPieces, deletePiece, loadImageFromURL } from '../utils/pieceStorage';
 import './Preview.css';
 
-function Preview({ savedPieces, onPiecesChange }) {
+function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
   const canvasRef = useRef(null);
   const [pieces, setPieces] = useState([]);
   const [boardPieces, setBoardPieces] = useState(Array(64).fill(null));
@@ -175,16 +175,28 @@ function Preview({ savedPieces, onPiecesChange }) {
                       <img src={piece.thumbnail} alt={piece.name} />
                     </div>
                     <div className="piece-name">{piece.name}</div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeletePiece(piece.id);
-                      }}
-                      className="delete-piece-btn"
-                      title="Delete piece"
-                    >
-                      ×
-                    </button>
+                    <div className="piece-actions">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onEditPiece) onEditPiece(piece);
+                        }}
+                        className="edit-piece-btn"
+                        title="Edit piece"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeletePiece(piece.id);
+                        }}
+                        className="delete-piece-btn"
+                        title="Delete piece"
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
