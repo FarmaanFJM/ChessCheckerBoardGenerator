@@ -244,10 +244,26 @@ export class LayerManager {
     this.layers = [];
     this.nextId = data.nextId || 1;
     this.activeLayerId = data.activeLayerId;
+    const usedIds = new Set();
+    const idMap = new Map();
 
     for (const layerData of data.layers) {
+      let layerId = layerData.id;
+      const isValidId = Number.isInteger(layerId);
+      if (!isValidId || usedIds.has(layerId)) {
+        layerId = this.nextId;
+      }
+      while (usedIds.has(layerId)) {
+        layerId += 1;
+      }
+      if (layerId >= this.nextId) {
+        this.nextId = layerId + 1;
+      }
+      usedIds.add(layerId);
+      idMap.set(layerData.id, layerId);
+
       const layer = {
-        id: layerData.id,
+        id: layerId,
         name: layerData.name,
         canvas: document.createElement('canvas'),
         visible: layerData.visible,
@@ -274,14 +290,7 @@ export class LayerManager {
       this.layers.push(layer);
     }
 
-    const hasActiveLayer = this.layers.some((layer) => layer.id === this.activeLayerId);
-    if (!hasActiveLayer) {
-      this.activeLayerId = this.layers[0]?.id || null;
-    }
-
-    const maxId = this.layers.reduce((max, layer) => Math.max(max, layer.id), 0);
-    if (this.nextId <= maxId) {
-      this.nextId = maxId + 1;
-    }
+    const mappedActiveId = idMap.get(this.activeLayerId);
+    this.activeLayerId = mappedActiveId || this.layers[0]?.id || null;
   }
 }
