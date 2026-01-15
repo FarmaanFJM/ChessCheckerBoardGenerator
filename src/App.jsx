@@ -98,6 +98,71 @@ function App() {
     return input
   }
 
+  // Generate color name from HEX
+  const getColorName = (hex) => {
+    const rgb = hexToRgb(hex)
+    if (!rgb) return 'color'
+
+    const { r, g, b } = rgb
+
+    // Calculate brightness (0-255)
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000
+
+    // Calculate saturation
+    const max = Math.max(r, g, b)
+    const min = Math.min(r, g, b)
+    const saturation = max === 0 ? 0 : (max - min) / max
+
+    // Grayscale colors
+    if (saturation < 0.15) {
+      if (brightness < 30) return 'black'
+      if (brightness < 80) return 'dark-gray'
+      if (brightness < 160) return 'gray'
+      if (brightness < 220) return 'light-gray'
+      return 'white'
+    }
+
+    // Determine hue
+    let hue
+    if (r === max) {
+      hue = ((g - b) / (max - min)) * 60
+    } else if (g === max) {
+      hue = (2 + (b - r) / (max - min)) * 60
+    } else {
+      hue = (4 + (r - g) / (max - min)) * 60
+    }
+    if (hue < 0) hue += 360
+
+    // Determine brightness prefix
+    const prefix = brightness < 100 ? 'dark-' : brightness < 180 ? '' : 'light-'
+
+    // Determine base color name
+    let baseName
+    if (hue < 15 || hue >= 345) baseName = 'red'
+    else if (hue < 45) baseName = 'orange'
+    else if (hue < 70) baseName = 'yellow'
+    else if (hue < 150) baseName = 'green'
+    else if (hue < 200) baseName = 'cyan'
+    else if (hue < 260) baseName = 'blue'
+    else if (hue < 290) baseName = 'purple'
+    else if (hue < 330) baseName = 'pink'
+    else baseName = 'red'
+
+    // Special cases for common colors
+    if (baseName === 'orange' && brightness > 200 && saturation > 0.3) return 'beige'
+    if (baseName === 'orange' && brightness < 120) return 'brown'
+    if (baseName === 'blue' && brightness < 80 && saturation > 0.5) return 'navy'
+    if (baseName === 'purple' && brightness < 80) return 'maroon'
+
+    return prefix + baseName
+  }
+
+  // Generate random 3-letter code
+  const generateCode = () => {
+    const letters = 'abcdefghijklmnopqrstuvwxyz'
+    return Array.from({ length: 3 }, () => letters[Math.floor(Math.random() * 26)]).join('')
+  }
+
   // Generate procedural noise texture
   const generateNoiseTexture = (size) => {
     const canvas = document.createElement('canvas')
@@ -246,7 +311,20 @@ function App() {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      const filename = mode === 'solid' ? `solid-color-${resolution}.png` : `chessboard-${resolution}.png`
+
+      // Generate descriptive filename with colors and unique code
+      const code = generateCode()
+      let filename
+
+      if (mode === 'solid') {
+        const colorName = getColorName(solidColor)
+        filename = `solid-color-${colorName}-${code}.png`
+      } else {
+        const lightColor = lightUseGradient ? getColorName(lightGradientStart) : getColorName(lightSolidColor)
+        const darkColor = darkUseGradient ? getColorName(darkGradientStart) : getColorName(darkSolidColor)
+        filename = `chessboard-${lightColor}-${darkColor}-${code}.png`
+      }
+
       link.download = filename
       link.click()
       URL.revokeObjectURL(url)
