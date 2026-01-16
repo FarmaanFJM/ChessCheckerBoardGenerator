@@ -241,13 +241,47 @@ export class LayerManager {
    * Import layers data (for loading)
    */
   async importData(data, width, height) {
+    const layersData = Array.isArray(data?.layers)
+      ? data.layers
+      : Array.isArray(data)
+        ? data
+        : [];
     this.layers = [];
-    this.nextId = data.nextId || 1;
-    this.activeLayerId = data.activeLayerId;
+    this.nextId = data?.nextId || 1;
+    this.activeLayerId = data?.activeLayerId;
+    const usedIds = new Set();
+    const idMap = new Map();
+    const seenSignatures = new Set();
 
-    for (const layerData of data.layers) {
+    for (const layerData of layersData) {
+      const signature = [
+        layerData.name,
+        layerData.visible,
+        layerData.opacity,
+        layerData.locked,
+        layerData.imageData
+      ].join('|');
+      if (seenSignatures.has(signature)) {
+        continue;
+      }
+      seenSignatures.add(signature);
+
+      let layerId = layerData.id;
+      const isValidId = Number.isInteger(layerId);
+      if (!isValidId || usedIds.has(layerId)) {
+        layerId = this.nextId;
+      }
+      while (usedIds.has(layerId)) {
+        layerId += 1;
+      }
+      if (layerId >= this.nextId) {
+        this.nextId = layerId + 1;
+      }
+      usedIds.add(layerId);
+      idMap.set(layerData.id, layerId);
+
       const layer = {
-        id: layerData.id,
+        id: layerId,
         name: layerData.name,
         canvas: document.createElement('canvas'),
         visible: layerData.visible,
@@ -273,5 +307,8 @@ export class LayerManager {
 
       this.layers.push(layer);
     }
+
+    const mappedActiveId = idMap.get(this.activeLayerId);
+    this.activeLayerId = mappedActiveId || this.layers[0]?.id || null;
   }
 }
