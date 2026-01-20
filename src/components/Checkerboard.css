@@ -9,9 +9,31 @@
 .checkerboard-content {
   display: flex;
   flex: 1;
-  gap: 40px;
-  padding: 40px;
+  gap: 24px;
+  padding: 20px;
   overflow: hidden;
+}
+
+.checkerboard-container .preview-section {
+  flex-shrink: 0;
+  padding: 1rem;
+}
+
+.checkerboard-container .preview-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.checkerboard-container .controls-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  max-height: 100%;
+}
+
+.checkerboard-container .controls-section h2 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 /* Import existing styles from App.css */
