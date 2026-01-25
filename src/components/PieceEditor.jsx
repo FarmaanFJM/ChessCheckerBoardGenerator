@@ -10,6 +10,7 @@ import './PieceEditor.css';
 
 function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
   const canvasRef = useRef(null);
+  const canvasContainerRef = useRef(null);
   const fileInputRef = useRef(null);
   const importInputRef = useRef(null);
   const [layerManager] = useState(() => {
@@ -28,6 +29,9 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
   const [referenceImage, setReferenceImage] = useState(null);
   const [referenceOpacity, setReferenceOpacity] = useState(0.5);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showFullscreenControl, setShowFullscreenControl] = useState(true);
+  const fullscreenHideTimerRef = useRef(null);
   const [, forceUpdate] = useState({});
 
   useEffect(() => {
@@ -105,6 +109,25 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
     }
   }, [canvasRef.current]);
 
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isCanvasFullscreen = document.fullscreenElement === canvasContainerRef.current;
+      setIsFullscreen(isCanvasFullscreen);
+      if (isCanvasFullscreen) {
+        scheduleFullscreenHide();
+      } else {
+        clearFullscreenHideTimer();
+        setShowFullscreenControl(true);
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      clearFullscreenHideTimer();
+    };
+  }, []);
+
   // Load piece for editing
   useEffect(() => {
     if (pieceToEdit && pieceToEdit.layers && drawingEngine) {
@@ -135,6 +158,39 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
     const state = layerManager.exportData();
     historyManager.saveState(state);
     updateHistoryButtons();
+  };
+
+  const clearFullscreenHideTimer = () => {
+    if (fullscreenHideTimerRef.current) {
+      clearTimeout(fullscreenHideTimerRef.current);
+      fullscreenHideTimerRef.current = null;
+    }
+  };
+
+  const scheduleFullscreenHide = () => {
+    clearFullscreenHideTimer();
+    setShowFullscreenControl(true);
+    fullscreenHideTimerRef.current = setTimeout(() => {
+      setShowFullscreenControl(false);
+    }, 2000);
+  };
+
+  const handleFullscreenToggle = async () => {
+    if (!canvasContainerRef.current) return;
+    if (document.fullscreenElement === canvasContainerRef.current) {
+      try {
+        await document.exitFullscreen();
+      } catch (error) {
+        console.error('Failed to exit fullscreen:', error);
+      }
+      return;
+    }
+
+    try {
+      await canvasContainerRef.current.requestFullscreen();
+    } catch (error) {
+      console.error('Failed to enter fullscreen:', error);
+    }
   };
 
   const updateHistoryButtons = () => {
@@ -446,12 +502,36 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
 
           <div
             className="canvas-container"
+            ref={canvasContainerRef}
             onWheel={(e) => e.preventDefault()}
             style={{
               backgroundImage: showGrid ? 'repeating-linear-gradient(0deg, #555 0px, #555 1px, transparent 1px, transparent 20px), repeating-linear-gradient(90deg, #555 0px, #555 1px, transparent 1px, transparent 20px)' : 'none',
               backgroundColor: '#3a3a3a'
             }}
           >
+            <div
+              className={`fullscreen-control ${isFullscreen && !showFullscreenControl ? 'hidden' : ''}`}
+              onMouseEnter={() => {
+                if (isFullscreen) {
+                  clearFullscreenHideTimer();
+                  setShowFullscreenControl(true);
+                }
+              }}
+              onMouseLeave={() => {
+                if (isFullscreen) {
+                  scheduleFullscreenHide();
+                }
+              }}
+            >
+              <button
+                type="button"
+                className="fullscreen-toggle-btn"
+                onClick={handleFullscreenToggle}
+                title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+              >
+                {isFullscreen ? '⤫' : '⛶'}
+              </button>
+            </div>
             <canvas
               ref={canvasRef}
               width={512}
