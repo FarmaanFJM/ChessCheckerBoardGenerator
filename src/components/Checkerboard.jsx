@@ -36,6 +36,10 @@ function Checkerboard() {
   const [texture, setTexture] = useState('none');
   const [textureOpacity, setTextureOpacity] = useState(0.5);
 
+  // Grid settings
+  const [gridLineWidth, setGridLineWidth] = useState(0);
+  const [gridLineColor, setGridLineColor] = useState('#000000');
+
   const [resolution, setResolution] = useState('1920x1920');
   const canvasRef = useRef(null);
   const textureImagesRef = useRef({});
@@ -267,6 +271,24 @@ function Checkerboard() {
       ctx.fillRect(0, 0, size, size);
       ctx.globalAlpha = 1.0;
     }
+
+    if (gridLineWidth > 0) {
+      ctx.strokeStyle = gridLineColor;
+      ctx.lineWidth = gridLineWidth;
+
+      for (let i = 0; i <= 8; i++) {
+        const position = i * squareSize;
+        ctx.beginPath();
+        ctx.moveTo(position, 0);
+        ctx.lineTo(position, size);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, position);
+        ctx.lineTo(size, position);
+        ctx.stroke();
+      }
+    }
   };
 
   const downloadBoard = () => {
@@ -322,7 +344,8 @@ function Checkerboard() {
     lightUseGradient, lightSolidColor, lightGradientStart, lightGradientEnd, lightGradientAngle, lightGradientHardness,
     darkUseGradient, darkSolidColor, darkGradientStart, darkGradientEnd, darkGradientAngle, darkGradientHardness,
     useBoardGradient, boardGradientStart, boardGradientEnd, boardGradientAngle, boardGradientOpacity,
-    texture, textureOpacity
+    texture, textureOpacity,
+    gridLineWidth, gridLineColor
   ]);
 
   return (
@@ -714,6 +737,65 @@ function Checkerboard() {
                   </label>
                 </div>
               )}
+
+              <div className="control-group">
+                <span className="label-text">Grid Lines</span>
+                <label className="slider-label">
+                  <div className="slider-header">
+                    <span>Width: {gridLineWidth}px</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      value={gridLineWidth}
+                      onChange={(e) => setGridLineWidth(Math.max(0, Math.min(20, parseFloat(e.target.value) || 0)))}
+                      className="angle-text-input"
+                    />
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20"
+                    step="0.5"
+                    value={gridLineWidth}
+                    onChange={(e) => setGridLineWidth(parseFloat(e.target.value))}
+                    className="slider-input"
+                  />
+                </label>
+                <div className="color-input-wrapper">
+                  <input
+                    type="color"
+                    value={gridLineColor}
+                    onChange={(e) => setGridLineColor(e.target.value)}
+                    className="color-input"
+                  />
+                  <input
+                    type="text"
+                    value={gridLineColor}
+                    onChange={(e) => setGridLineColor(parseColorInput(e.target.value))}
+                    className="color-text-input"
+                    placeholder="#000000 or rgb(0,0,0)"
+                  />
+                </div>
+                <div className="rgb-input-group">
+                  {[['r', 'R'], ['g', 'G'], ['b', 'B']].map(([key, label]) => (
+                    <input
+                      key={key}
+                      type="number"
+                      min="0"
+                      max="255"
+                      value={hexToRgb(gridLineColor)?.[key] || 0}
+                      onChange={(e) => {
+                        const rgb = hexToRgb(gridLineColor) || { r: 0, g: 0, b: 0 };
+                        rgb[key] = parseInt(e.target.value) || 0;
+                        setGridLineColor(rgbToHex(rgb.r, rgb.g, rgb.b));
+                      }}
+                      className="rgb-input"
+                      placeholder={label}
+                    />
+                  ))}
+                </div>
+              </div>
             </>
           )}
 
