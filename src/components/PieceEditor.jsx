@@ -6,6 +6,8 @@ import { DrawingEngine } from '../utils/drawingEngine';
 import { HistoryManager } from '../utils/historyManager';
 import { savePiece, generatePieceId, downloadPiece, createThumbnail, loadImageFromFile } from '../utils/pieceStorage';
 import { getAvailableTemplates, loadTemplate } from '../utils/svgTemplates';
+import Icon from '../ui/Icon';
+import { useFeedback } from '../ui/Feedback';
 import './PieceEditor.css';
 
 function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
@@ -29,6 +31,7 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
   const [referenceOpacity, setReferenceOpacity] = useState(0.5);
   const [showTemplates, setShowTemplates] = useState(false);
   const [, forceUpdate] = useState({});
+  const { confirm, toast } = useFeedback();
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -273,8 +276,8 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
     await savePiece(piece);
     if (onPiecesSave) onPiecesSave();
 
-    alert(`Piece "${name}" ${currentPieceId ? 'updated' : 'saved'} successfully!`);
-    handleNewPiece();
+    toast(`Piece "${name}" ${currentPieceId ? 'updated' : 'saved'}`, { type: 'success' });
+    resetEditor();
   };
 
   const handleDownloadPiece = async () => {
@@ -285,26 +288,33 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
     await downloadPiece(mergedCanvas, `${name}.png`);
   };
 
-  const handleNewPiece = () => {
+  const handleNewPiece = async () => {
     const shouldClear = layerManager.getLayerCount() === 1 &&
       !currentPieceName &&
-      !currentPieceId ? true : confirm('Create a new piece? This will clear the current work.');
+      !currentPieceId ? true : await confirm({
+        title: 'Discard current work?',
+        body: 'Starting a new piece clears the canvas and layers. Unsaved changes are lost.',
+        confirmLabel: 'Discard and start new',
+        destructive: true,
+      });
 
-    if (shouldClear) {
-      layerManager.layers = [];
-      layerManager.createLayer('Background', 256, 256);
-      setCurrentPieceName('');
-      setCurrentPieceId(null);
-      setReferenceImage(null);
-      if (onClearEdit) onClearEdit();
-      renderCanvas();
+    if (shouldClear) resetEditor();
+  };
 
-      // Clear history and save new initial state
-      historyManager.clear();
-      setTimeout(() => {
-        saveToHistory();
-      }, 0);
-    }
+  const resetEditor = () => {
+    layerManager.layers = [];
+    layerManager.createLayer('Background', 256, 256);
+    setCurrentPieceName('');
+    setCurrentPieceId(null);
+    setReferenceImage(null);
+    if (onClearEdit) onClearEdit();
+    renderCanvas();
+
+    // Clear history and save new initial state
+    historyManager.clear();
+    setTimeout(() => {
+      saveToHistory();
+    }, 0);
   };
 
   const handleImportPiece = async (e) => {
@@ -334,9 +344,9 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
           saveToHistory();
         }, 0);
 
-        alert('Image imported successfully!');
+        toast('Image imported', { type: 'success' });
       } catch (error) {
-        alert('Failed to import image: ' + error.message);
+        toast('Failed to import image: ' + error.message, { type: 'error' });
       }
     }
   };
@@ -349,7 +359,7 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
         setReferenceImage(img);
         renderCanvas();
       } catch (error) {
-        alert('Failed to load reference image: ' + error.message);
+        toast('Failed to load reference image: ' + error.message, { type: 'error' });
       }
     }
   };
@@ -376,11 +386,11 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
           type="text"
           value={currentPieceName}
           onChange={(e) => setCurrentPieceName(e.target.value)}
-          placeholder="Piece name..."
+          placeholder="Piece name"
           className="piece-name-input"
         />
         <div className="editor-actions">
-          <button onClick={handleNewPiece} className="btn">New Piece</button>
+          <button onClick={handleNewPiece} className="sm-btn">New piece</button>
           <input
             ref={importInputRef}
             type="file"
@@ -388,9 +398,9 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
             onChange={handleImportPiece}
             style={{ display: 'none' }}
           />
-          <button onClick={() => importInputRef.current.click()} className="btn">📁 Import</button>
-          <button onClick={handleSavePiece} className="btn btn-primary">💾 Save Piece</button>
-          <button onClick={handleDownloadPiece} className="btn">⬇️ Download</button>
+          <button onClick={() => importInputRef.current.click()} className="sm-btn"><Icon name="import" />Import</button>
+          <button onClick={handleSavePiece} className="sm-btn sm-btn--primary"><Icon name="save" />Save piece</button>
+          <button onClick={handleDownloadPiece} className="sm-btn"><Icon name="download" />Download</button>
         </div>
       </div>
 
@@ -411,46 +421,43 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
                 onClick={handleUndo}
                 disabled={!canUndo}
                 title="Undo (Ctrl+Z)"
-                style={{ opacity: canUndo ? 1 : 0.5 }}
+                aria-label="Undo"
               >
-                ↶
+                <Icon name="undo" />
               </button>
               <button
                 onClick={handleRedo}
                 disabled={!canRedo}
                 title="Redo (Ctrl+Shift+Z)"
-                style={{ opacity: canRedo ? 1 : 0.5 }}
+                aria-label="Redo"
               >
-                ↷
+                <Icon name="redo" />
               </button>
             </div>
             <div className="toolbar-group">
-              <button onClick={handleZoomOut} title="Zoom Out (-)">🔍-</button>
+              <button onClick={handleZoomOut} title="Zoom out (-)" aria-label="Zoom out"><Icon name="zoomOut" /></button>
               <span className="zoom-display">{Math.round(zoom * 100)}%</span>
-              <button onClick={handleZoomIn} title="Zoom In (+)">🔍+</button>
-              <button onClick={handleResetView} title="Reset View (0)">↺</button>
+              <button onClick={handleZoomIn} title="Zoom in (+)" aria-label="Zoom in"><Icon name="zoomIn" /></button>
+              <button onClick={handleResetView} title="Reset view (0)" aria-label="Reset view"><Icon name="reset" /></button>
             </div>
             <div className="toolbar-group">
               <button
                 onClick={() => setShowGrid(!showGrid)}
-                className={showGrid ? 'active' : ''}
-                title="Toggle Grid"
+                aria-pressed={showGrid}
+                title="Toggle grid"
+                aria-label="Toggle grid"
               >
-                #
+                <Icon name="grid" />
               </button>
-              <button onClick={() => setShowTemplates(!showTemplates)} title="Load Template">
-                📐
+              <button onClick={() => setShowTemplates(!showTemplates)} title="Load template" aria-label="Load template">
+                <Icon name="layers" />
               </button>
             </div>
           </div>
 
           <div
-            className="canvas-container"
+            className={`canvas-container ${showGrid ? 'with-grid' : ''}`}
             onWheel={(e) => e.preventDefault()}
-            style={{
-              backgroundImage: showGrid ? 'repeating-linear-gradient(0deg, #555 0px, #555 1px, transparent 1px, transparent 20px), repeating-linear-gradient(90deg, #555 0px, #555 1px, transparent 1px, transparent 20px)' : 'none',
-              backgroundColor: '#3a3a3a'
-            }}
           >
             <canvas
               ref={canvasRef}
@@ -465,12 +472,13 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
           </div>
 
           {showTemplates && (
-            <div className="templates-modal">
-              <div className="templates-content">
-                <h3>Load Template</h3>
+            <div className="sm-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setShowTemplates(false)}>
+              <div className="sm-dialog templates-content" role="dialog" aria-modal="true" aria-label="Load template">
+                <h2 className="sm-dialog__title">Load template</h2>
+                <div className="sm-dialog__body">
                 <div className="templates-grid">
                   {getAvailableTemplates().map((template) => (
-                    <div
+                    <button
                       key={template.id}
                       className="template-item"
                       onClick={() => handleLoadTemplate(template.id)}
@@ -481,10 +489,13 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
                       />
                       <div className="template-name">{template.name}</div>
                       <div className="template-description">{template.description}</div>
-                    </div>
+                    </button>
                   ))}
                 </div>
-                <button onClick={() => setShowTemplates(false)} className="btn">Close</button>
+                </div>
+                <div className="sm-dialog__foot">
+                  <button onClick={() => setShowTemplates(false)} className="sm-btn">Close</button>
+                </div>
               </div>
             </div>
           )}
@@ -500,7 +511,7 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
           />
 
           <div className="reference-panel">
-            <h3>Reference Image</h3>
+            <h3>Reference image</h3>
             {referenceImage ? (
               <>
                 <div className="reference-preview">
@@ -520,7 +531,7 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
                       }}
                     />
                   </label>
-                  <button onClick={handleClearReference} className="btn btn-small">Remove</button>
+                  <button onClick={handleClearReference} className="sm-btn">Remove</button>
                 </div>
               </>
             ) : (
@@ -534,9 +545,10 @@ function PieceEditor({ savedPieces, onPiecesSave, pieceToEdit, onClearEdit }) {
                 />
                 <button
                   onClick={() => fileInputRef.current.click()}
-                  className="btn"
+                  className="sm-btn"
                 >
-                  Upload Reference Image
+                  <Icon name="image" />
+                  Upload reference image
                 </button>
               </div>
             )}

@@ -3,6 +3,14 @@ import './App.css';
 import Checkerboard from './components/Checkerboard';
 import PieceEditor from './components/PieceEditor';
 import Preview from './components/Preview';
+import { FeedbackProvider } from './ui/Feedback';
+import logo from './assets/logo.svg';
+
+const TABS = [
+  { id: 'checkerboard', label: 'Checkerboard' },
+  { id: 'piece-editor', label: 'Piece Editor' },
+  { id: 'preview', label: 'Preview' },
+];
 
 function App() {
   const [activeTab, setActiveTab] = useState('checkerboard');
@@ -19,50 +27,46 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <header className="app-header">
-        <h1>♟ Chess/Checker Board Generator</h1>
-        <nav className="app-nav">
-          <button
-            className={`nav-btn ${activeTab === 'checkerboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('checkerboard')}
-          >
-            Checkerboard
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'piece-editor' ? 'active' : ''}`}
-            onClick={() => setActiveTab('piece-editor')}
-          >
-            Piece Editor
-          </button>
-          <button
-            className={`nav-btn ${activeTab === 'preview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('preview')}
-          >
-            Preview
-          </button>
-        </nav>
-      </header>
+    <FeedbackProvider>
+      <div className="app">
+        <header className="app-header">
+          <img className="app-logo" src={logo} alt="" />
+          <span className="app-title">Board Generator</span>
+          <nav className="app-nav" role="tablist" aria-label="Workspace">
+            {TABS.map(tab => (
+              <button
+                key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                className="nav-btn"
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </header>
 
-      <main className="app-main">
-        {activeTab === 'checkerboard' && <Checkerboard />}
-        {activeTab === 'piece-editor' && (
-          <PieceEditor
-            savedPieces={piecesSaveCounter}
-            onPiecesSave={handlePiecesSave}
-            pieceToEdit={pieceToEdit}
-            onClearEdit={() => setPieceToEdit(null)}
-          />
-        )}
-        {activeTab === 'preview' && (
-          <Preview
-            savedPieces={piecesSaveCounter}
-            onPiecesChange={handlePiecesSave}
-            onEditPiece={handleEditPiece}
-          />
-        )}
-      </main>
-    </div>
+        <main className="app-main">
+          {activeTab === 'checkerboard' && <Checkerboard />}
+          {activeTab === 'piece-editor' && (
+            <PieceEditor
+              savedPieces={piecesSaveCounter}
+              onPiecesSave={handlePiecesSave}
+              pieceToEdit={pieceToEdit}
+              onClearEdit={() => setPieceToEdit(null)}
+            />
+          )}
+          {activeTab === 'preview' && (
+            <Preview
+              savedPieces={piecesSaveCounter}
+              onPiecesChange={handlePiecesSave}
+              onEditPiece={handleEditPiece}
+            />
+          )}
+        </main>
+      </div>
+    </FeedbackProvider>
   );
 }
 

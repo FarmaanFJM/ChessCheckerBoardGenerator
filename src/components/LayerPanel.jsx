@@ -1,9 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Icon from '../ui/Icon';
+import { useFeedback } from '../ui/Feedback';
 import './LayerPanel.css';
 
 function LayerPanel({ layerManager, onLayersChange }) {
   const [layers, setLayers] = useState(layerManager.getAllLayers());
   const [activeLayerId, setActiveLayerId] = useState(layerManager.activeLayerId);
+  const [menuLayerId, setMenuLayerId] = useState(null);
+  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+  const { confirm, prompt } = useFeedback();
+
+  // Close the layer menu on any outside click or Escape.
+  useEffect(() => {
+    if (menuLayerId === null) return;
+    const close = () => setMenuLayerId(null);
+    const onKey = (e) => e.key === 'Escape' && close();
+    window.addEventListener('click', close);
+    window.addEventListener('keydown', onKey);
+    return () => { window.removeEventListener('click', close); window.removeEventListener('keydown', onKey); };
+  }, [menuLayerId]);
 
   const refreshLayers = () => {
     setLayers([...layerManager.getAllLayers()]);
@@ -18,12 +33,16 @@ function LayerPanel({ layerManager, onLayersChange }) {
     refreshLayers();
   };
 
-  const handleDeleteLayer = (id) => {
-    if (layers.length === 1) {
-      alert('Cannot delete the last layer');
-      return;
-    }
-    if (confirm('Delete this layer?')) {
+  const handleDeleteLayer = async (id) => {
+    if (layers.length === 1) return;
+    const layer = layerManager.getLayer(id);
+    if (await confirm({
+      title: `Delete layer "${layer.name}"?`,
+      body: 'Its drawing is removed from this piece.',
+      confirmLabel: 'Delete layer',
+      icon: 'trash',
+      destructive: true,
+    })) {
       layerManager.deleteLayer(id);
       refreshLayers();
     }
@@ -59,11 +78,15 @@ function LayerPanel({ layerManager, onLayersChange }) {
     refreshLayers();
   };
 
-  const handleRename = (id) => {
+  const handleRename = async (id) => {
     const layer = layerManager.getLayer(id);
-    const newName = prompt('Enter new layer name:', layer.name);
-    if (newName && newName.trim()) {
-      layerManager.renameLayer(id, newName.trim());
+    const newName = await prompt({
+      title: 'Rename layer',
+      input: { label: 'Name', value: layer.name },
+      confirmLabel: 'Rename',
+    });
+    if (newName) {
+      layerManager.renameLayer(id, newName);
       refreshLayers();
     }
   };
@@ -73,8 +96,14 @@ function LayerPanel({ layerManager, onLayersChange }) {
     refreshLayers();
   };
 
-  const handleClearLayer = (id) => {
-    if (confirm('Clear this layer?')) {
+  const handleClearLayer = async (id) => {
+    const layer = layerManager.getLayer(id);
+    if (await confirm({
+      title: `Clear layer "${layer.name}"?`,
+      body: 'Everything drawn on this layer is erased.',
+      confirmLabel: 'Clear layer',
+      destructive: true,
+    })) {
       layerManager.clearLayer(id);
       refreshLayers();
     }
@@ -84,8 +113,8 @@ function LayerPanel({ layerManager, onLayersChange }) {
     <div className="layer-panel">
       <div className="layer-panel-header">
         <h3>Layers</h3>
-        <button onClick={handleAddLayer} className="add-layer-btn" title="Add Layer">
-          +
+        <button onClick={handleAddLayer} className="sm-icon-btn sm-icon-btn--sm" title="Add layer" aria-label="Add layer">
+          <Icon name="plus" />
         </button>
       </div>
 
@@ -97,7 +126,8 @@ function LayerPanel({ layerManager, onLayersChange }) {
           return (
             <div
               key={layer.id}
-              className={`layer-item ${isActive ? 'active' : ''} ${layer.locked ? 'locked' : ''}`}
+              className={`layer-item ${layer.locked ? 'locked' : ''}`}
+              aria-selected={isActive}
               onClick={() => handleSelectLayer(layer.id)}
             >
               <div className="layer-preview">
@@ -133,61 +163,83 @@ function LayerPanel({ layerManager, onLayersChange }) {
 
               <div className="layer-controls">
                 <button
-                  className={`icon-btn ${layer.visible ? '' : 'inactive'}`}
+                  className="icon-btn"
+                  aria-pressed={!layer.visible}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleToggleVisibility(layer.id);
                   }}
                   title={layer.visible ? 'Hide' : 'Show'}
                 >
-                  {layer.visible ? '👁️' : '🚫'}
+                  <Icon name={layer.visible ? 'eye' : 'eyeOff'} />
                 </button>
 
                 <button
-                  className={`icon-btn ${layer.locked ? 'active' : ''}`}
+                  className="icon-btn"
+                  aria-pressed={layer.locked}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleToggleLock(layer.id);
                   }}
                   title={layer.locked ? 'Unlock' : 'Lock'}
                 >
-                  {layer.locked ? '🔒' : '🔓'}
+                  <Icon name={layer.locked ? 'lock' : 'unlock'} />
                 </button>
 
                 <div className="layer-menu">
-                  <button className="icon-btn" title="More options">⋮</button>
-                  <div className="layer-dropdown">
-                    <button onClick={(e) => { e.stopPropagation(); handleDuplicateLayer(layer.id); }}>
+                  <button
+                    className="icon-btn"
+                    title="More options"
+                    aria-haspopup="menu"
+                    aria-expanded={menuLayerId === layer.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const r = e.currentTarget.getBoundingClientRect();
+                      setMenuPos({ x: window.innerWidth - r.right, y: r.bottom + 4 });
+                      setMenuLayerId(menuLayerId === layer.id ? null : layer.id);
+                    }}
+                  >
+                    <Icon name="more" />
+                  </button>
+                  {menuLayerId === layer.id && (
+                  <div className="layer-dropdown sm-menu" role="menu" style={{ right: menuPos.x, top: menuPos.y }}>
+                    <button role="menuitem" className="sm-menu__item" onClick={(e) => { e.stopPropagation(); setMenuLayerId(null); handleDuplicateLayer(layer.id); }}>
                       Duplicate
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleClearLayer(layer.id); }}>
+                    <button role="menuitem" className="sm-menu__item" onClick={(e) => { e.stopPropagation(); setMenuLayerId(null); handleClearLayer(layer.id); }}>
                       Clear
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleRename(layer.id); }}>
+                    <button role="menuitem" className="sm-menu__item" onClick={(e) => { e.stopPropagation(); setMenuLayerId(null); handleRename(layer.id); }}>
                       Rename
                     </button>
-                    <hr />
+                    <hr className="sm-menu__sep" />
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleMoveUp(layer.id); }}
+                      role="menuitem"
+                      className="sm-menu__item"
+                      onClick={(e) => { e.stopPropagation(); setMenuLayerId(null); handleMoveUp(layer.id); }}
                       disabled={layerIndex === layers.length - 1}
                     >
                       Move Up
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleMoveDown(layer.id); }}
+                      role="menuitem"
+                      className="sm-menu__item"
+                      onClick={(e) => { e.stopPropagation(); setMenuLayerId(null); handleMoveDown(layer.id); }}
                       disabled={layerIndex === 0}
                     >
                       Move Down
                     </button>
-                    <hr />
+                    <hr className="sm-menu__sep" />
                     <button
-                      onClick={(e) => { e.stopPropagation(); handleDeleteLayer(layer.id); }}
-                      className="danger"
+                      role="menuitem"
+                      className="sm-menu__item sm-menu__item--danger"
+                      onClick={(e) => { e.stopPropagation(); setMenuLayerId(null); handleDeleteLayer(layer.id); }}
                       disabled={layers.length === 1}
                     >
-                      Delete
+                      <Icon name="trash" />
+                      Delete layer
                     </button>
-                  </div>
+                  </div>)}
                 </div>
               </div>
             </div>

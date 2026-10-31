@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Icon from '../ui/Icon';
 import './ToolPanel.css';
 
 function ToolPanel({ drawingEngine, onToolChange, onColorChange, onBrushSizeChange }) {
@@ -8,13 +9,13 @@ function ToolPanel({ drawingEngine, onToolChange, onColorChange, onBrushSizeChan
   const [showColorPicker, setShowColorPicker] = useState(false);
 
   const tools = [
-    { id: 'brush', icon: '✏️', name: 'Brush', shortcut: 'B' },
-    { id: 'eraser', icon: '🧹', name: 'Eraser', shortcut: 'E' },
-    { id: 'fill', icon: '🪣', name: 'Fill Bucket', shortcut: 'G' },
-    { id: 'picker', icon: '💧', name: 'Color Picker', shortcut: 'I' },
-    { id: 'line', icon: '📏', name: 'Line', shortcut: 'L' },
-    { id: 'rectangle', icon: '⬜', name: 'Rectangle', shortcut: 'R' },
-    { id: 'circle', icon: '⭕', name: 'Circle', shortcut: 'C' }
+    { id: 'brush', icon: 'brush', name: 'Brush', shortcut: 'B' },
+    { id: 'eraser', icon: 'eraser', name: 'Eraser', shortcut: 'E' },
+    { id: 'fill', icon: 'fill', name: 'Fill Bucket', shortcut: 'G' },
+    { id: 'picker', icon: 'picker', name: 'Color Picker', shortcut: 'I' },
+    { id: 'line', icon: 'line', name: 'Line', shortcut: 'L' },
+    { id: 'rectangle', icon: 'square', name: 'Rectangle', shortcut: 'R' },
+    { id: 'circle', icon: 'circle', name: 'Circle', shortcut: 'C' }
   ];
 
   const handleToolSelect = (toolId) => {
@@ -68,11 +69,12 @@ function ToolPanel({ drawingEngine, onToolChange, onColorChange, onBrushSizeChan
           {tools.map((tool) => (
             <button
               key={tool.id}
-              className={`tool-btn ${currentTool === tool.id ? 'active' : ''}`}
+              className="tool-btn"
+              aria-pressed={currentTool === tool.id}
               onClick={() => handleToolSelect(tool.id)}
               title={`${tool.name} (${tool.shortcut})`}
             >
-              <span className="tool-icon">{tool.icon}</span>
+              <Icon name={tool.icon} />
               <span className="tool-name">{tool.name}</span>
               <span className="tool-shortcut">{tool.shortcut}</span>
             </button>
@@ -83,16 +85,19 @@ function ToolPanel({ drawingEngine, onToolChange, onColorChange, onBrushSizeChan
       <div className="tool-section">
         <h4>Color</h4>
         <div className="color-section">
-          <div
+          <button
+            type="button"
             className="color-preview"
             style={{ backgroundColor: color }}
             onClick={() => setShowColorPicker(!showColorPicker)}
+            aria-expanded={showColorPicker}
+            aria-label="Color picker"
           />
           <input
             type="text"
             value={color}
             onChange={(e) => handleColorChange(e.target.value)}
-            className="color-input"
+            className="color-hex-input"
             placeholder="#000000"
           />
         </div>
@@ -142,7 +147,7 @@ function ToolPanel({ drawingEngine, onToolChange, onColorChange, onBrushSizeChan
       </div>
 
       <div className="tool-section">
-        <h4>Brush Size: {brushSize}px</h4>
+        <h4>Brush size: {brushSize}px</h4>
         <input
           type="range"
           min="1"
@@ -160,7 +165,7 @@ function ToolPanel({ drawingEngine, onToolChange, onColorChange, onBrushSizeChan
       </div>
 
       <div className="tool-section">
-        <h4>Quick Colors</h4>
+        <h4>Quick colors</h4>
         <div className="quick-colors">
           {['#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'].map((c) => (
             <button

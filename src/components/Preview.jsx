@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { loadAllPieces, deletePiece, loadImageFromURL } from '../utils/pieceStorage';
+import Icon from '../ui/Icon';
+import { useFeedback } from '../ui/Feedback';
 import './Preview.css';
 
 function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
@@ -7,6 +9,7 @@ function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
   const [pieces, setPieces] = useState([]);
   const [boardPieces, setBoardPieces] = useState(Array(64).fill(null));
   const [selectedPiece, setSelectedPiece] = useState(null);
+  const { confirm, toast } = useFeedback();
   const [boardColors, setBoardColors] = useState({
     light: '#F0D9B5',
     dark: '#B58863'
@@ -79,7 +82,14 @@ function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
   };
 
   const handleDeletePiece = async (pieceId) => {
-    if (confirm('Delete this piece?')) {
+    const piece = pieces.find(p => p.id === pieceId);
+    if (await confirm({
+      title: `Delete piece "${piece?.name ?? ''}"?`,
+      body: 'This removes the saved piece. This cannot be undone.',
+      confirmLabel: 'Delete piece',
+      icon: 'trash',
+      destructive: true,
+    })) {
       await deletePiece(pieceId);
       loadPieces();
       if (onPiecesChange) onPiecesChange();
@@ -90,16 +100,18 @@ function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
     }
   };
 
+  // Reversible, so no confirmation: clear and offer Undo.
   const handleClearBoard = () => {
-    if (confirm('Clear all pieces from the board?')) {
-      setBoardPieces(Array(64).fill(null));
-    }
+    if (!boardPieces.some(Boolean)) return;
+    const previous = boardPieces;
+    setBoardPieces(Array(64).fill(null));
+    toast('Board cleared', { action: { label: 'Undo', run: () => setBoardPieces(previous) } });
   };
 
   const handleSetupDefault = () => {
     // Setup standard chess starting position with saved pieces
     if (pieces.length === 0) {
-      alert('No pieces available. Create some pieces in the Piece Editor first.');
+      toast('No pieces yet. Create one in the Piece Editor.');
       return;
     }
 
@@ -133,11 +145,13 @@ function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
   return (
     <div className="preview-container">
       <div className="preview-header">
-        <h2>Board Preview</h2>
         <div className="preview-actions">
-          <button onClick={handleSetupDefault} className="btn">Setup Default Position</button>
-          <button onClick={handleClearBoard} className="btn">🗑️ Clear Board</button>
-          <button onClick={handleDownloadBoard} className="btn btn-primary">⬇️ Download Board</button>
+          <button onClick={handleSetupDefault} className="sm-btn">Set up default position</button>
+          <button onClick={handleClearBoard} className="sm-btn">Clear board</button>
+          <button onClick={handleDownloadBoard} className="sm-btn sm-btn--primary">
+            <Icon name="download" />
+            Download board
+          </button>
         </div>
       </div>
 
@@ -151,25 +165,26 @@ function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
             className="board-canvas"
           />
           <p className="board-hint">
-            {selectedPiece ? 'Click on a square to place the selected piece' : 'Select a piece from the right panel to place it on the board'}
+            {selectedPiece ? 'Click a square to place the piece' : 'Select a piece to place it on the board'}
           </p>
         </div>
 
         <div className="preview-sidebar">
           <div className="pieces-panel">
-            <h3>Available Pieces</h3>
+            <h3>Pieces</h3>
             {pieces.length === 0 ? (
-              <div className="no-pieces">
-                <p>No pieces created yet</p>
-                <p className="hint">Go to the Piece Editor tab to create pieces</p>
-              </div>
+              <p className="no-pieces">No pieces yet. Create one in the Piece Editor.</p>
             ) : (
-              <div className="pieces-grid">
+              <div className="pieces-grid" role="listbox" aria-label="Pieces">
                 {pieces.map((piece) => (
                   <div
                     key={piece.id}
-                    className={`piece-item ${selectedPiece?.id === piece.id ? 'selected' : ''}`}
+                    className="piece-item"
+                    aria-selected={selectedPiece?.id === piece.id}
+                    role="option"
+                    tabIndex={0}
                     onClick={() => setSelectedPiece(piece)}
+                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), setSelectedPiece(piece))}
                   >
                     <div className="piece-thumbnail">
                       <img src={piece.thumbnail} alt={piece.name} />
@@ -181,20 +196,22 @@ function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
                           e.stopPropagation();
                           if (onEditPiece) onEditPiece(piece);
                         }}
-                        className="edit-piece-btn"
+                        className="sm-icon-btn sm-icon-btn--sm"
                         title="Edit piece"
+                        aria-label="Edit piece"
                       >
-                        ✏️
+                        <Icon name="pencil" />
                       </button>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDeletePiece(piece.id);
                         }}
-                        className="delete-piece-btn"
+                        className="sm-icon-btn sm-icon-btn--sm"
                         title="Delete piece"
+                        aria-label="Delete piece"
                       >
-                        ×
+                        <Icon name="trash" />
                       </button>
                     </div>
                   </div>
@@ -204,10 +221,10 @@ function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
           </div>
 
           <div className="board-colors-panel">
-            <h3>Board Colors</h3>
+            <h3>Board colors</h3>
             <div className="color-inputs">
               <div className="color-input-group">
-                <label>Light Squares</label>
+                <label>Light squares</label>
                 <div className="color-input-wrapper">
                   <input
                     type="color"
@@ -222,7 +239,7 @@ function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
                 </div>
               </div>
               <div className="color-input-group">
-                <label>Dark Squares</label>
+                <label>Dark squares</label>
                 <div className="color-input-wrapper">
                   <input
                     type="color"
@@ -240,14 +257,13 @@ function Preview({ savedPieces, onPiecesChange, onEditPiece }) {
           </div>
 
           <div className="stats-panel">
-            <h3>Stats</h3>
             <div className="stats">
               <div className="stat-item">
-                <span className="stat-label">Available Pieces:</span>
+                <span className="stat-label">Pieces</span>
                 <span className="stat-value">{pieces.length}</span>
               </div>
               <div className="stat-item">
-                <span className="stat-label">Pieces on Board:</span>
+                <span className="stat-label">On board</span>
                 <span className="stat-value">{boardPieces.filter(p => p !== null).length}</span>
               </div>
             </div>

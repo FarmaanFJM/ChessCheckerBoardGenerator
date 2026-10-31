@@ -36,6 +36,19 @@ Download your custom chessboard in multiple HD resolutions:
 - Responsive design for mobile and desktop
 - PNG format for universal compatibility
 
+## Desktop app
+
+The app also runs as a desktop application (Electron) with a custom title bar and native window controls.
+
+```bash
+npm install
+npm run desktop:dev    # Vite dev server plus Electron
+npm run desktop        # build, then run the packaged web build in Electron
+npm run desktop:dist   # installers into release/ (dmg, nsis, AppImage)
+```
+
+The UI follows Summa-UI (approved guidance v0.1.0, vendored in `third_party/summa-ui-guidance`, pinned by `summa-ui.lock.json`, recorded in `summa-ui.usage.json`). Design tokens and presets live in `src/styles/summa-*.css`. Native `alert`, `confirm` and `prompt` are replaced by `src/ui/Feedback.jsx` (`prompt` does not exist in Electron).
+
 ## Getting Started
 
 ### Prerequisites

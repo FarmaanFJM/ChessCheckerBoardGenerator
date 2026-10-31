@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import wood1 from '../../assets/wood1.jpg';
 import wood2 from '../../assets/wood2.jpg';
 import grain1 from '../../assets/grain1.jpg';
+import Icon from '../ui/Icon';
 import './Checkerboard.css';
 
 function Checkerboard() {
@@ -352,15 +353,13 @@ function Checkerboard() {
     <div className="checkerboard-container">
       <div className="checkerboard-content">
         <div className="preview-section">
-          <h2>Preview</h2>
           <div className="canvas-wrapper">
             <canvas ref={canvasRef} className="preview-canvas"></canvas>
           </div>
         </div>
 
         <div className="controls-section">
-          <h2>Customize</h2>
-
+          <div className="controls-scroll">
           <div className="control-group">
             <label>
               <span className="label-text">Mode</span>
@@ -799,6 +798,78 @@ function Checkerboard() {
             </>
           )}
 
+          {/* Presets */}
+          {mode === 'checkerboard' && (
+            <div className="presets">
+              <h3>Presets</h3>
+              <div className="preset-buttons">
+                <button onClick={() => {
+                  setLightUseGradient(false);
+                  setLightSolidColor('#f0d9b5');
+                  setDarkUseGradient(false);
+                  setDarkSolidColor('#b58863');
+                  setUseBoardGradient(false);
+                }} className="sm-btn preset-btn">Classic</button>
+                <button onClick={() => {
+                  setLightUseGradient(false);
+                  setLightSolidColor('#eeeed2');
+                  setDarkUseGradient(false);
+                  setDarkSolidColor('#769656');
+                  setUseBoardGradient(false);
+                }} className="sm-btn preset-btn">Green</button>
+                <button onClick={() => {
+                  setLightUseGradient(false);
+                  setLightSolidColor('#e8dfd9');
+                  setDarkUseGradient(true);
+                  setDarkGradientStart('#7b85af');
+                  setDarkGradientEnd('#3e4358');
+                  setDarkGradientAngle(180);
+                  setDarkGradientHardness(0.5);
+                  setUseBoardGradient(false);
+                }} className="sm-btn preset-btn">Blue Gradient</button>
+                <button onClick={() => {
+                  setLightUseGradient(false);
+                  setLightSolidColor('#e8dfd9');
+                  setDarkUseGradient(true);
+                  setDarkGradientStart('#7b85af');
+                  setDarkGradientEnd('#3e4358');
+                  setDarkGradientAngle(180);
+                  setDarkGradientHardness(0.5);
+                  setUseBoardGradient(true);
+                  setBoardGradientStart('rgba(255, 255, 255, 0.2)');
+                  setBoardGradientEnd('rgba(0, 0, 0, 0.3)');
+                  setBoardGradientAngle(180);
+                  setBoardGradientOpacity(0.3);
+                }} className="sm-btn preset-btn">Blue + Board</button>
+                <button onClick={() => {
+                  setLightUseGradient(true);
+                  setLightGradientStart('#fff8dc');
+                  setLightGradientEnd('#f0e5cc');
+                  setLightGradientAngle(135);
+                  setLightGradientHardness(0.3);
+                  setDarkUseGradient(true);
+                  setDarkGradientStart('#8b4513');
+                  setDarkGradientEnd('#cd853f');
+                  setDarkGradientAngle(135);
+                  setDarkGradientHardness(0.4);
+                  setUseBoardGradient(false);
+                }} className="sm-btn preset-btn">Wood</button>
+                <button onClick={() => {
+                  setLightUseGradient(false);
+                  setLightSolidColor('#e0f7fa');
+                  setDarkUseGradient(true);
+                  setDarkGradientStart('#0097a7');
+                  setDarkGradientEnd('#006064');
+                  setDarkGradientAngle(180);
+                  setDarkGradientHardness(0.5);
+                  setUseBoardGradient(false);
+                }} className="sm-btn preset-btn">Ocean</button>
+              </div>
+            </div>
+          )}
+          </div>
+
+          <div className="controls-footer">
           {/* Resolution */}
           <div className="control-group">
             <label>
@@ -815,79 +886,12 @@ function Checkerboard() {
             </label>
           </div>
 
-          <button onClick={downloadBoard} className="download-button">
-            ⬇ Download {mode === 'solid' ? 'Solid Color' : 'Chessboard'}
+          <button onClick={downloadBoard} className="sm-btn sm-btn--primary download-button">
+            <Icon name="download" />
+            Download {mode === 'solid' ? 'solid color' : 'chessboard'}
           </button>
 
-          {/* Presets */}
-          {mode === 'checkerboard' && (
-            <div className="presets">
-              <h3>Quick Presets</h3>
-              <div className="preset-buttons">
-                <button onClick={() => {
-                  setLightUseGradient(false);
-                  setLightSolidColor('#f0d9b5');
-                  setDarkUseGradient(false);
-                  setDarkSolidColor('#b58863');
-                  setUseBoardGradient(false);
-                }} className="preset-btn">Classic</button>
-                <button onClick={() => {
-                  setLightUseGradient(false);
-                  setLightSolidColor('#eeeed2');
-                  setDarkUseGradient(false);
-                  setDarkSolidColor('#769656');
-                  setUseBoardGradient(false);
-                }} className="preset-btn">Green</button>
-                <button onClick={() => {
-                  setLightUseGradient(false);
-                  setLightSolidColor('#e8dfd9');
-                  setDarkUseGradient(true);
-                  setDarkGradientStart('#7b85af');
-                  setDarkGradientEnd('#3e4358');
-                  setDarkGradientAngle(180);
-                  setDarkGradientHardness(0.5);
-                  setUseBoardGradient(false);
-                }} className="preset-btn">Blue Gradient</button>
-                <button onClick={() => {
-                  setLightUseGradient(false);
-                  setLightSolidColor('#e8dfd9');
-                  setDarkUseGradient(true);
-                  setDarkGradientStart('#7b85af');
-                  setDarkGradientEnd('#3e4358');
-                  setDarkGradientAngle(180);
-                  setDarkGradientHardness(0.5);
-                  setUseBoardGradient(true);
-                  setBoardGradientStart('rgba(255, 255, 255, 0.2)');
-                  setBoardGradientEnd('rgba(0, 0, 0, 0.3)');
-                  setBoardGradientAngle(180);
-                  setBoardGradientOpacity(0.3);
-                }} className="preset-btn">Blue + Board</button>
-                <button onClick={() => {
-                  setLightUseGradient(true);
-                  setLightGradientStart('#fff8dc');
-                  setLightGradientEnd('#f0e5cc');
-                  setLightGradientAngle(135);
-                  setLightGradientHardness(0.3);
-                  setDarkUseGradient(true);
-                  setDarkGradientStart('#8b4513');
-                  setDarkGradientEnd('#cd853f');
-                  setDarkGradientAngle(135);
-                  setDarkGradientHardness(0.4);
-                  setUseBoardGradient(false);
-                }} className="preset-btn">Wood</button>
-                <button onClick={() => {
-                  setLightUseGradient(false);
-                  setLightSolidColor('#e0f7fa');
-                  setDarkUseGradient(true);
-                  setDarkGradientStart('#0097a7');
-                  setDarkGradientEnd('#006064');
-                  setDarkGradientAngle(180);
-                  setDarkGradientHardness(0.5);
-                  setUseBoardGradient(false);
-                }} className="preset-btn">Ocean</button>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

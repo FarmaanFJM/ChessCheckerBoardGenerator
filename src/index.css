@@ -1,21 +1,30 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* Global base. Colours, type and geometry come from the Summa-UI tokens. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font);
+  font-size: var(--fs);
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--s0);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #1a1a1a;
-  min-height: 100vh;
-  padding: 20px;
+  overflow: hidden; /* desktop app: panels scroll, the window does not */
 }
 
-#root {
-  max-width: 1400px;
-  margin: 0 auto;
-}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+h1, h2, h3, h4 { font-weight: 600; }
+
+/* Keyboard focus: 1.5px neutral ring (P15, P17). Text inputs use a 1px ring instead. */
+:focus { outline: none; }
+:focus-visible { outline: 1.5px solid var(--focus); outline-offset: 1px; }
+input[type="text"]:focus-visible, input[type="number"]:focus-visible, select:focus-visible { outline: none; box-shadow: 0 0 0 1px var(--focus); }
+
+/* Thin neutral scrollbars */
+* { scrollbar-width: thin; scrollbar-color: var(--s4) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 5px; border: 2px solid transparent; background-clip: content-box; }
+
+@media (forced-colors: active) { :focus-visible { outline: 2px solid Highlight; } }

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "application": {
+    "name": "chess-checker-board-generator",
+    "repository": "https://github.com/FarmaanFJM/ChessCheckerBoardGenerator"
+  },
+  "guidance": {
+    "name": "summa-ui-guidance",
+    "version": "0.1.0",
+    "bundleDigest": "5ef73215334c313089cb3cd87f6f78f65eef48f67dfdc5d53bd84fedad408cc7",
+    "source": "vendored"
+  },
+  "recordedAt": "2026-10-31T10:38:05Z",
+  "exceptions": [
+    {
+      "principle": "P16",
+      "reason": "Top tab bar with a full-height workspace below, chosen for a creative tool with three modes",
+      "scope": "app shell"
+    }
+  ]
+}
